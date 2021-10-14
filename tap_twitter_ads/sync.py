@@ -185,7 +185,7 @@ def sync_endpoint(client,
     path = endpoint_config.get('path')
     LOGGER.info('Stream: {} - endpoint_config: {}'.format(stream_name, endpoint_config))
     id_fields = endpoint_config.get('key_properties', [])
-    parent_id_field = next(iter(id_fields), None) # first ID field
+    parent_id_field = next(iter(id_fields), None)  # first ID field
     params = endpoint_config.get('params', {})
     bookmark_field = next(iter(endpoint_config.get('replication_keys', [])), None)
     datetime_format = endpoint_config.get('datetime_format')
@@ -1052,6 +1052,12 @@ def sync(client, config, catalog, state):
 
         # PARENT STREAM LOOP
         for stream_name in parent_streams:
+            child_stream = catalog.get_stream(stream_name)
+            # child_stream is not in catalog
+            if not child_stream:
+                LOGGER.info('Skipping child stream {} not found in catalog.'.format(stream_name))
+                continue
+
             update_currently_syncing(state, stream_name)
             endpoint_config = flat_streams.get(stream_name)
 

@@ -81,42 +81,39 @@
       "type": ["null", "string"]
     },
     "top_hashtags": {
-      "anyOf": [
-        {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        {
-          "type": "null"
-        }
+      "items": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "type": [
+        "null",
+        "array"
       ]
     },
     "top_tweets": {
-      "anyOf": [
-        {
-          "type": "array",
-          "items": {
-            "type": "integer"
-          }
-        },
-        {
-          "type": "null"
-        }
+      "items": {
+        "type": [
+          "null",
+          "integer"
+        ]
+      },
+      "type": [
+        "null",
+        "array"
       ]
     },
     "top_users": {
-      "anyOf": [
-        {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        {
-          "type": "null"
-        }
+      "items": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "type": [
+        "null",
+        "array"
       ]
     }
   }

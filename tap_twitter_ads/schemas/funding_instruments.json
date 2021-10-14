@@ -26,16 +26,15 @@
       "type": ["null", "string"]
     },
     "reasons_not_able_to_fund": {
-      "anyOf": [
-        {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        {
-          "type": "null"
-        }
+      "items": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "type": [
+        "null",
+        "array"
       ]
     },
     "io_header": {

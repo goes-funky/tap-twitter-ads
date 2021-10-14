@@ -164,17 +164,17 @@
         "default_profile_image": {
           "type": ["null", "boolean"]
         },
+
         "withheld_in_countries": {
-          "anyOf": [
-            {
-              "type": "array",
-              "items": {
-                "type": "string"
-              }
-            },
-            {
-              "type": "null"
-            }
+          "items": {
+            "type": [
+              "null",
+              "string"
+            ]
+          },
+          "type": [
+            "null",
+            "array"
           ]
         },
         "withheld_scope": {
@@ -206,16 +206,15 @@
                             "type": ["null", "string"]
                           },
                           "indices": {
-                            "anyOf": [
-                              {
-                                "type": "array",
-                                "items": {
-                                  "type": "integer"
-                                }
-                              },
-                              {
-                                "type": "null"
-                              }
+                            "items": {
+                              "type": [
+                                "null",
+                                "integer"
+                              ]
+                            },
+                            "type": [
+                              "null",
+                              "array"
                             ]
                           }
                         }
@@ -258,17 +257,15 @@
       "additionalProperties": false,
       "properties": {
         "coordinates": {
-          "anyOf": [
-            {
-              "type": "null"
-            },
-            {
-              "type": "array",
-              "items": {
-                "type": "number",
-                "multipleOf": 1e-10
-              }
-            }
+          "items": {
+            "type": [
+              "null",
+              "number"
+            ]
+          },
+          "type": [
+            "null",
+            "array"
           ]
         },
         "type": {
@@ -306,39 +303,17 @@
           "additionalProperties": false,
           "properties": {
             "coordinates": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "anyOf": [
-                      {
-                        "type": "array",
-                        "items": {
-                          "anyOf": [
-                            {
-                              "type": "null"
-                            },
-                            {
-                              "type": "array",
-                              "items": {
-                                "type": "number",
-                                "multipleOf": 1e-10
-                              }
-                            }
-                          ]
-                        }
-                      },
-                      {
-                        "type": "null"
-                      }
-                    ]
-                  }
-                },
-                {
-                  "type": "null"
-                }
-              ]
-            },
+          "items": {
+            "type": [
+              "null",
+              "number"
+            ]
+          },
+          "type": [
+            "null",
+            "array"
+          ]
+        },
             "type": {
               "type": ["null", "string"]
             }

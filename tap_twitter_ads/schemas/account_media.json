@@ -13,16 +13,15 @@
       "format": "date-time"
     },
     "reasons_not_servable": {
-      "anyOf": [
-        {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        {
-          "type": "null"
-        }
+      "items": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "type": [
+        "null",
+        "array"
       ]
     },
     "servable": {

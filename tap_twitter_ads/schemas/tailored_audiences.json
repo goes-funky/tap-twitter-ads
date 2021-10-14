@@ -12,16 +12,15 @@
       "type": ["null", "string"]
     },
     "targetable_types": {
-      "anyOf": [
-        {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        {
-          "type": "null"
-        }
+      "items": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "type": [
+        "null",
+        "array"
       ]
     },
     "audience_type": {
@@ -37,16 +36,15 @@
       "type": ["null", "string"]
     },
     "reasons_not_targetable": {
-      "anyOf": [
-        {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        {
-          "type": "null"
-        }
+      "items": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "type": [
+        "null",
+        "array"
       ]
     },
     "created_at": {
