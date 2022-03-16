@@ -2,27 +2,24 @@
   "type": "object",
   "additionalProperties": false,
   "properties": {
-    "account_id": {
+    "id": {
       "type": ["null", "string"]
     },
     "line_item_id": {
       "type": ["null", "string"]
     },
-    "name": {
+    "tracking_tag_url": {
       "type": ["null", "string"]
     },
-    "id": {
+    "tracking_tag_type": {
       "type": ["null", "string"]
     },
-    "operator_type": {
+    "tracking_tag_type": {
       "type": ["null", "string"]
     },
     "created_at": {
       "type": ["null", "string"],
       "format": "date-time"
-    },
-    "targeting_value": {
-      "type": ["null", "string"]
     },
     "updated_at": {
       "type": ["null", "string"],
@@ -30,9 +27,6 @@
     },
     "deleted": {
       "type": ["null", "boolean"]
-    },
-    "targeting_type": {
-      "type": ["null", "string"]
     }
   }
 }

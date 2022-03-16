@@ -52,14 +52,17 @@ STREAMS = {
         'replication_method': 'FULL_TABLE',
         'params': {}
     },
+
+    # [DEPRECATED] bidding_rules endpoint
     # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/bidding-rules#bidding-rules
-    'bidding_rules': {
-        'path': 'bidding_rules',
-        'data_key': 'data',
-        'key_properties': ['currency'],
-        'replication_method': 'FULL_TABLE',
-        'params': {}
-    },
+    # 'bidding_rules': {
+    #     'path': 'bidding_rules',
+    #     'data_key': 'data',
+    #     'key_properties': ['currency'],
+    #     'replication_method': 'FULL_TABLE',
+    #     'params': {}
+    # },
+
     # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/campaigns#campaigns
     'campaigns': {
         'path': 'accounts/{account_id}/campaigns',
@@ -76,7 +79,7 @@ STREAMS = {
     },
     # Reference: https://developer.twitter.com/en/docs/ads/creatives/api-reference/website#website-cards
     'cards_website': {
-        'path': 'accounts/{account_id}/cards/website',
+        'path': 'accounts/{account_id}/cards',
         'data_key': 'data',
         'key_properties': ['id'],
         'replication_method': 'INCREMENTAL',
@@ -529,7 +532,24 @@ STREAMS = {
             'count': 1000,
             'cursor': None # NOT include_mentions_and_replies
         }
-    }
+    },
+    # Reference: https://developer.twitter.com/en/docs/twitter-ads-api/campaign-management/api-reference/tracking-tags
+    'tracking_tags': {
+            'path': 'accounts/{account_id}/tracking_tags',
+            'data_key': 'data',
+            'key_properties': ['id'],
+            'replication_method': 'INCREMENTAL',
+            'replication_keys': ['updated_at'],
+            'datetime_format': '%a %b %d %H:%M:%S %z %Y',
+            'params': {
+                'account_id': '{sub_type}',
+                'sort_by': ['updated_at-desc'],
+                'with_deleted': '{with_deleted}',
+                'count': 1000,
+                'cursor': None  # NOT include_mentions_and_replies
+            }
+        },
+
 }
 # pylint: enable=line-too-long
 

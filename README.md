@@ -6,7 +6,7 @@ spec](https://github.com/singer-io/getting-started/blob/master/SPEC.md).
 
 This tap:
 
-- Pulls raw data from the [Twitter Ads API, version 7](https://developer.twitter.com/en/docs/ads/general/overview) using the [Twitter Ads Python SDK](https://github.com/twitterdev/twitter-python-ads-sdk).
+- Pulls raw data from the [Twitter Ads API, version 10](https://developer.twitter.com/en/docs/ads/general/overview) using the [Twitter Ads Python SDK](https://github.com/twitterdev/twitter-python-ads-sdk).
 
 [Twitter Ads Tap: Sync Review](https://docs.google.com/document/d/1MrXWHGyOsCv-xI7ecuUWG0VIAy8ko5fwKn-I91p-PSc/edit?usp=sharing): Summary of tap sync process and looping
 
@@ -17,7 +17,6 @@ This tap:
   - [account_media](https://developer.twitter.com/en/docs/ads/creatives/api-reference/account-media#account-media)
   - [accounts](https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/accounts#accounts)
   - [advertiser_business_categories](https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/advertiser-business-categories#advertiser-business-categories)
-  - [bidding_rules](https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/bidding-rules#bidding-rules)
   - [campaigns](https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/campaigns#campaigns)
   - **cards**:
     - [image_app_download](https://developer.twitter.com/en/docs/ads/creatives/api-reference/image-app-download#image-app-download-cards)
@@ -43,6 +42,7 @@ This tap:
   - [scheduled_promoted_tweets](https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/scheduled-promoted-tweets#scheduled-promoted-tweets)
   - [tailored_audiences](https://developer.twitter.com/en/docs/ads/audiences/api-reference/tailored-audiences#tailored-audiences)
   - [tweets](https://developer.twitter.com/en/docs/ads/creatives/api-reference/tweets#get-accounts-account-id-scoped-timeline) (scheduled and published, not draft)
+  - [tracking_tags](https://developer.twitter.com/en/docs/twitter-ads-api/campaign-management/api-reference/tracking-tags)
 
 - Extracts the following targeting GET endpoints:
   - [targeting_conversations](https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/targeting-options#get-targeting-criteria-conversations)
@@ -223,7 +223,6 @@ The process is described in [Obtaining Ads Account Credential](https://developer
       | accounts_daily_report                      | 87      | 1       |
       | accounts_metros_hourly_report              | 226240  | 1       |
       | advertiser_business_categories             | 16      | 1       |
-      | bidding_rules                              | 64      | 1       |
       | campaigns                                  | 2       | 1       |
       | campaigns_conversion_tags_daily_report     | 0       | 1       |
       | campaigns_daily_report                     | 10      | 1       |

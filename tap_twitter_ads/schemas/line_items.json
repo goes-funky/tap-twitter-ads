@@ -5,7 +5,7 @@
     "account_id": {
       "type": ["null", "string"]
     },
-    "bid_type": {
+    "bid_strategy": {
       "type": ["null", "string"]
     },
     "advertiser_user_id": {
@@ -33,9 +33,6 @@
     "bid_amount_local_micro": {
       "type": ["null", "integer"]
     },
-    "automatically_select_bid": {
-      "type": ["null", "boolean"]
-    },
     "advertiser_domain": {
       "type": ["null", "string"]
     },
@@ -45,7 +42,7 @@
     "primary_web_event_tag": {
       "type": ["null", "string"]
     },
-    "charge_by": {
+    "pay_by": {
       "type": ["null", "string"]
     },
     "product_type": {
@@ -91,18 +88,6 @@
     "created_at": {
       "type": ["null", "string"],
       "format": "date-time"
-    },
-    "tracking_tags": {
-      "items": {
-        "type": [
-          "null",
-          "string"
-        ]
-      },
-      "type": [
-        "null",
-        "array"
-      ]
     },
     "updated_at": {
       "type": ["null", "string"],
