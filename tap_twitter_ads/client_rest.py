@@ -1,11 +1,3 @@
-import sys
-import time
-
-from twitter_ads.client import Client
-from twitter_ads.campaign import LineItem
-from twitter_ads.enum import METRIC_GROUP
-from twitter_ads.utils import split_list
-
 from decimal import Decimal
 import time
 import json

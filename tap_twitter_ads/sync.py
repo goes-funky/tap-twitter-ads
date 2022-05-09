@@ -259,16 +259,6 @@ def sync_endpoint(client,
                     new_val = val.replace('{sub_type}', sub_type)
                 if '{targeting_criteria}' in val:
                     targeting_criteria = []
-                    # [
-                    #     {
-                    #         "targeting_type": "LOCATION",
-                    #         "targeting_value": "96683cc9126741d1"
-                    #     },
-                    #     {
-                    #         "targeting_type": "BROAD_KEYWORD",
-                    #         "targeting_value": "cats"
-                    #     },
-                    # ]
                     new_val = val.replace('{targeting_criteria}', targeting_criteria)
             new_params[key] = new_val
 
