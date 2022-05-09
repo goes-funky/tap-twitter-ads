@@ -1,0 +1,17 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "audience_size": {
+      "type": ["null", "object"],
+      "properties": {
+        "min": {
+          "type": ["null", "integer"]
+        },
+        "max": {
+          "type": ["null", "integer"]
+        }
+      }
+    }
+  }
+}

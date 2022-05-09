@@ -1,0 +1,43 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "name": {
+      "type": ["null", "string"]
+    },
+    "id": {
+      "type": ["null", "string"]
+    },
+    "view_through_window": {
+      "type": ["null", "integer"]
+    },
+    "click_window": {
+      "type": ["null", "integer"]
+    },
+    "embed_code": {
+      "type": ["null", "string"]
+    },
+    "retargeting_enabled": {
+      "type": ["null", "boolean"]
+    },
+    "status": {
+      "type": ["null", "string"]
+    },
+    "last_tracked_at": {
+      "type": ["null", "string"],
+      "format": "date-time"
+    },
+    "type": {
+      "type": ["null", "string"]
+    },
+    "website_tag_id": {
+      "type": ["null", "string"]
+    },
+    "auto_created": {
+      "type": ["null", "boolean"]
+    },
+    "deleted": {
+      "type": ["null", "boolean"]
+    }
+  }
+}

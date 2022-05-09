@@ -123,9 +123,11 @@ def get_schemas(reports):
         if report_entity not in ENTITY_TYPES:
             err = 'Report: {}, Entity: {}: INVALID ENTITY'.format(report_name, report_entity)
             running_error = '{}; {}'.format(running_error, err)
+
         if report_segment not in SEGMENTS:
             err = 'Report: {}, Segment: {}: INVALID SEGMENT'.format(report_name, report_segment)
             running_error = '{}; {}'.format(running_error, err)
+
         if report_granularity not in GRANULARITIES:
             err = 'Report: {}, Granularity: {}: INVALID GRANULARITY'.format(
                 report_name, report_granularity)

@@ -30,6 +30,21 @@ STREAMS = {
             'cursor': None
         }
     },
+    # Reference: https://developer.twitter.com/en/docs/twitter-ads-api/campaign-management/api-reference/account-apps
+    'account_apps': {
+        'path': 'accounts/{account_id}/account_apps',
+        'data_key': 'data',
+        'key_properties': ['id'],
+        'replication_method': 'INCREMENTAL',
+        'replication_keys': ['updated_at'],
+        'params': {
+            'account_ids': '{account_ids}',
+            'sort_by': ['updated_at-desc'],
+            'with_deleted': '{with_deleted}',
+            'count': 1000,
+            'cursor': None
+        }
+    },
     # Reference: https://developer.twitter.com/en/docs/ads/creatives/api-reference/account-media#account-media
     'account_media': {
         'path': 'accounts/{account_id}/account_media',
@@ -44,7 +59,8 @@ STREAMS = {
             'cursor': None
         }
     },
-    # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/advertiser-business-categories#advertiser-business-categories
+    # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/advertiser-business
+    # -categories#advertiser-business-categories
     'advertiser_business_categories': {
         'path': 'advertiser_business_categories',
         'data_key': 'data',
@@ -52,7 +68,6 @@ STREAMS = {
         'replication_method': 'FULL_TABLE',
         'params': {}
     },
-
     # [DEPRECATED] bidding_rules endpoint
     # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/bidding-rules#bidding-rules
     # 'bidding_rules': {
@@ -63,6 +78,70 @@ STREAMS = {
     #     'params': {}
     # },
 
+    # Reference: https://developer.twitter.com/en/docs/twitter-ads-api/measurement/api-reference/app-event-tags
+    'app_event_tags': {
+        'path': 'accounts/{account_id}/app_event_tags',
+        'data_key': 'data',
+        'key_properties': ['id'],
+        'replication_method': 'INCREMENTAL',
+        'replication_keys': ['updated_at'],
+        'params': {
+            'sort_by': ['updated_at-desc'],
+            'with_deleted': '{with_deleted}',
+            'count': 1000,
+            'cursor': None
+        }
+    },
+    # Reference: https://developer.twitter.com/en/docs/twitter-ads-api/campaign-management/api-reference/line-items
+    # -summary
+    # TODO - audience_estimate !
+    'audience_estimate': {
+        'path': 'accounts/{account_id}/line_items',
+        'data_key': 'data',
+        'key_properties': ['id'],
+        'replication_method': 'INCREMENTAL',
+        'replication_keys': ['updated_at'],
+        'params': {
+            'sort_by': ['updated_at-desc'],
+            'with_deleted': '{with_deleted}',
+            'count': 1000,
+            'cursor': None
+        },
+        'children': {
+            # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/targeting-criteria#targeting-criteria
+            'targeting_criteria': {
+                'path': 'accounts/{account_id}/targeting_criteria',
+                'data_key': 'data',
+                'key_properties': ['line_item_id', 'id'],
+                'replication_method': 'FULL_TABLE',
+                'parent_ids_limit': 200,
+                'params': {
+                    'line_item_ids': '{parent_ids}',  # up to 200 comma delim ids
+                    'with_deleted': '{with_deleted}',
+                    'count': 1000,
+                    'cursor': None
+                },
+                'children': {
+                    # Reference: https://developer.twitter.com/en/docs/twitter-ads-api/campaign-management/api-reference/audience-summary
+                    'audience_estimate': {
+                        'path': '/accounts/{account_id}/audience_estimate',
+                        'data_key': 'data',
+                        'key_properties': ['id'],
+                        'replication_method': 'INCREMENTAL',
+                        'replication_keys': ['updated_at'],
+                        'params': {
+                            # fetch as param targeting criteria
+                            'targeting_criteria': '{targeting_criteria}',
+                            'sort_by': ['updated_at-desc'],
+                            'with_deleted': '{with_deleted}',
+                            'count': 1000,
+                            'cursor': None
+                        }
+                    },
+                }
+            }
+        }
+        },
     # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/campaigns#campaigns
     'campaigns': {
         'path': 'accounts/{account_id}/campaigns',
@@ -105,7 +184,8 @@ STREAMS = {
             'cursor': None
         }
     },
-    # Reference: https://developer.twitter.com/en/docs/ads/creatives/api-reference/image-app-download#image-app-download-cards
+    # Reference: https://developer.twitter.com/en/docs/ads/creatives/api-reference/image-app-download#image-app
+    # -download-cards
     'cards_image_app_download': {
         'path': 'accounts/{account_id}/cards/image_app_download',
         'data_key': 'data',
@@ -119,7 +199,8 @@ STREAMS = {
             'cursor': None
         }
     },
-    # Reference: https://developer.twitter.com/en/docs/ads/creatives/api-reference/video-app-download#video-app-download-cards
+    # Reference: https://developer.twitter.com/en/docs/ads/creatives/api-reference/video-app-download#video-app
+    # -download-cards
     'cards_video_app_download': {
         'path': 'accounts/{account_id}/cards/video_app_download',
         'data_key': 'data',
@@ -147,7 +228,8 @@ STREAMS = {
             'cursor': None
         }
     },
-    # Reference: https://developer.twitter.com/en/docs/ads/creatives/api-reference/image-conversation#image-conversation-cards
+    # Reference: https://developer.twitter.com/en/docs/ads/creatives/api-reference/image-conversation#image
+    # -conversation-cards
     'cards_image_conversation': {
         'path': 'accounts/{account_id}/cards/image_conversation',
         'data_key': 'data',
@@ -161,7 +243,8 @@ STREAMS = {
             'cursor': None
         }
     },
-    # Reference: https://developer.twitter.com/en/docs/ads/creatives/api-reference/video-conversation#video-conversation-cards
+    # Reference: https://developer.twitter.com/en/docs/ads/creatives/api-reference/video-conversation#video
+    # -conversation-cards
     'cards_video_conversation': {
         'path': 'accounts/{account_id}/cards/video_conversation',
         'data_key': 'data',
@@ -175,7 +258,8 @@ STREAMS = {
             'cursor': None
         }
     },
-    # Reference: https://developer.twitter.com/en/docs/ads/creatives/api-reference/image-direct-message#image-direct-message-cards
+    # Reference: https://developer.twitter.com/en/docs/ads/creatives/api-reference/image-direct-message#image-direct
+    # -message-cards
     'cards_image_direct_message': {
         'path': 'accounts/{account_id}/cards/image_direct_message',
         'data_key': 'data',
@@ -189,7 +273,8 @@ STREAMS = {
             'cursor': None
         }
     },
-    # Reference: https://developer.twitter.com/en/docs/ads/creatives/api-reference/video-direct-message#video-direct-message-cards
+    # Reference: https://developer.twitter.com/en/docs/ads/creatives/api-reference/video-direct-message#video-direct
+    # -message-cards
     'cards_video_direct_message': {
         'path': 'accounts/{account_id}/cards/video_direct_message',
         'data_key': 'data',
@@ -203,9 +288,10 @@ STREAMS = {
             'cursor': None
         }
     },
-    # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/content-categories#content-categories
+    # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/content-categories
+    # #content-categories
     'content_categories': {
-        'path': 'iab_categories',
+        'path': 'content_categories',
         'data_key': 'data',
         'key_properties': ['id'],
         'replication_method': 'FULL_TABLE',
@@ -214,7 +300,8 @@ STREAMS = {
             'cursor': None
         }
     },
-    # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/funding-instruments#funding-instruments
+    # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/funding-instruments
+    # #funding-instruments
     'funding_instruments': {
         'path': 'accounts/{account_id}/funding_instruments',
         'data_key': 'data',
@@ -228,9 +315,10 @@ STREAMS = {
             'cursor': None
         }
     },
-    # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/iab-categories#iab-categories
+    # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/iab-categories#iab
+    # -categories
     'iab_categories': {
-        'path': 'content_categories',
+        'path': 'iab_categories',
         'data_key': 'data',
         'key_properties': ['id'],
         'replication_method': 'FULL_TABLE',
@@ -258,7 +346,7 @@ STREAMS = {
                 'replication_method': 'FULL_TABLE',
                 'parent_ids_limit': 200,
                 'params': {
-                    'line_item_ids': '{parent_ids}', # up to 200 comma delim ids
+                    'line_item_ids': '{parent_ids}',  # up to 200 comma delim ids
                     'with_deleted': '{with_deleted}',
                     'count': 1000,
                     'cursor': None
@@ -266,21 +354,6 @@ STREAMS = {
             }
         }
     },
-    # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/line-item-apps#line-item-apps
-    # Endpoint Removed. TODO: check other endpoints added
-    # 'line_item_apps': {
-    #     'path': 'accounts/{account_id}/line_item_apps',
-    #     'data_key': 'data',
-    #     'key_properties': ['id'],
-    #     'replication_method': 'INCREMENTAL',
-    #     'replication_keys': ['updated_at'],
-    #     'params': {
-    #         'sort_by': ['updated_at-desc'],
-    #         'with_deleted': '{with_deleted}',
-    #         'count': 1000,
-    #         'cursor': None
-    #     }
-    # },
     # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/media-creatives#media-creatives
     'media_creatives': {
         'path': 'accounts/{account_id}/media_creatives',
@@ -295,7 +368,8 @@ STREAMS = {
             'cursor': None
         }
     },
-    # Reference: https://developer.twitter.com/en/docs/ads/creatives/api-reference/preroll-call-to-actions#preroll-call-to-actions
+    # Reference: https://developer.twitter.com/en/docs/ads/creatives/api-reference/preroll-call-to-actions#preroll
+    # -call-to-actions
     'preroll_call_to_actions': {
         'path': 'accounts/{account_id}/preroll_call_to_actions',
         'data_key': 'data',
@@ -309,7 +383,8 @@ STREAMS = {
             'cursor': None
         }
     },
-    # References: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/promoted-accounts#promoted-accounts
+    # References: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/promoted-accounts
+    # #promoted-accounts
     'promoted_accounts': {
         'path': 'accounts/{account_id}/promoted_accounts',
         'data_key': 'data',
@@ -323,7 +398,8 @@ STREAMS = {
             'cursor': None
         }
     },
-    # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/promoted-tweets#promoted-tweets
+    # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/promoted-tweets#promoted
+    # -tweets
     'promoted_tweets': {
         'path': 'accounts/{account_id}/promoted_tweets',
         'data_key': 'data',
@@ -337,7 +413,8 @@ STREAMS = {
             'cursor': None
         }
     },
-    # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/promotable-users#promotable-users
+    # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/promotable-users
+    # #promotable-users
     'promotable_users': {
         'path': 'accounts/{account_id}/promotable_users',
         'data_key': 'data',
@@ -351,9 +428,24 @@ STREAMS = {
             'cursor': None
         }
     },
-    # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/scheduled-promoted-tweets#scheduled-promoted-tweets
+    # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/scheduled-promoted
+    # -tweets#scheduled-promoted-tweets
     'scheduled_promoted_tweets': {
         'path': 'accounts/{account_id}/scheduled_promoted_tweets',
+        'data_key': 'data',
+        'key_properties': ['id'],
+        'replication_method': 'INCREMENTAL',
+        'replication_keys': ['updated_at'],
+        'params': {
+            'sort_by': ['updated_at-desc'],
+            'with_deleted': '{with_deleted}',
+            'count': 1000,
+            'cursor': None
+        }
+    },
+    # Reference: https://developer.twitter.com/en/docs/twitter-ads-api/creatives/api-reference/scheduled-tweets
+    'scheduled_tweets': {
+        'path': 'accounts/{account_id}/scheduled_tweets',
         'data_key': 'data',
         'key_properties': ['id'],
         'replication_method': 'INCREMENTAL',
@@ -379,7 +471,8 @@ STREAMS = {
             'cursor': None
         }
     },
-    # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/targeting-options#get-targeting-criteria-app-store-categories
+    # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/targeting-options#get
+    # -targeting-criteria-app-store-categories
     'targeting_app_store_categories': {
         'path': 'targeting_criteria/app_store_categories',
         'data_key': 'data',
@@ -387,7 +480,8 @@ STREAMS = {
         'replication_method': 'FULL_TABLE',
         'params': {}
     },
-    # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/targeting-options#get-targeting-criteria-conversations
+    # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/targeting-options#get
+    # -targeting-criteria-conversations
     'targeting_conversations': {
         'path': 'targeting_criteria/conversations',
         'data_key': 'data',
@@ -398,7 +492,8 @@ STREAMS = {
             'cursor': None
         }
     },
-    # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/targeting-options#get-targeting-criteria-devices
+    # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/targeting-options#get
+    # -targeting-criteria-devices
     'targeting_devices': {
         'path': 'targeting_criteria/devices',
         'data_key': 'data',
@@ -409,21 +504,22 @@ STREAMS = {
             'cursor': None
         }
     },
-    # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/targeting-options#get-targeting-criteria-events
+    # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/targeting-options#get
+    # -targeting-criteria-events
     'targeting_events': {
-        'path': 'targeting_criteria/devices',
+        'path': 'targeting_criteria/events',
         'data_key': 'data',
         'key_properties': ['targeting_value'],
         'replication_method': 'FULL_TABLE',
         'params': {
             'start_time': '{start_date}',
-            'country_codes': '{country_codes}',
             'event_types': 'CONFERENCE,HOLIDAY,MUSIC_AND_ENTERTAINMENT,OTHER,POLITICS,RECURRING,SPORTS',
             'count': 1000,
             'cursor': None
         }
     },
-    # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/targeting-options#get-targeting-criteria-interests
+    # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/targeting-options#get
+    # -targeting-criteria-interests
     'targeting_interests': {
         'path': 'targeting_criteria/interests',
         'data_key': 'data',
@@ -434,7 +530,8 @@ STREAMS = {
             'cursor': None
         }
     },
-    # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/targeting-options#get-targeting-criteria-languages
+    # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/targeting-options#get
+    # -targeting-criteria-languages
     'targeting_languages': {
         'path': 'targeting_criteria/languages',
         'data_key': 'data',
@@ -445,7 +542,8 @@ STREAMS = {
             'cursor': None
         }
     },
-    # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/targeting-options#get-targeting-criteria-locations
+    # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/targeting-options#get
+    # -targeting-criteria-locations
     'targeting_locations': {
         'path': 'targeting_criteria/locations',
         'data_key': 'data',
@@ -458,7 +556,8 @@ STREAMS = {
             'cursor': None
         }
     },
-    # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/targeting-options#get-targeting-criteria-network-operators
+    # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/targeting-options#get
+    # -targeting-criteria-network-operators
     'targeting_network_operators': {
         'path': 'targeting_criteria/network_operators',
         'data_key': 'data',
@@ -471,7 +570,8 @@ STREAMS = {
             'cursor': None
         }
     },
-    # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/targeting-options#get-targeting-criteria-platform-versions
+    # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/targeting-options#get
+    # -targeting-criteria-platform-versions
     'targeting_platform_versions': {
         'path': 'targeting_criteria/platform_versions',
         'data_key': 'data',
@@ -479,7 +579,8 @@ STREAMS = {
         'replication_method': 'FULL_TABLE',
         'params': {}
     },
-    # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/targeting-options#get-targeting-criteria-platforms
+    # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/targeting-options#get
+    # -targeting-criteria-platforms
     'targeting_platforms': {
         'path': 'targeting_criteria/platforms',
         'data_key': 'data',
@@ -490,7 +591,8 @@ STREAMS = {
             'cursor': None
         }
     },
-    # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/targeting-options#get-targeting-criteria-tv-markets
+    # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/targeting-options#get
+    # -targeting-criteria-tv-markets
     'targeting_tv_markets': {
         'path': 'targeting_criteria/tv_markets',
         'data_key': 'data',
@@ -523,14 +625,14 @@ STREAMS = {
         'replication_method': 'INCREMENTAL',
         'replication_keys': ['created_at'],
         'datetime_format': '%a %b %d %H:%M:%S %z %Y',
-        'sub_types': ['PUBLISHED', 'SCHEDULED'], # NOT DRAFT
+        'sub_types': ['PUBLISHED', 'SCHEDULED'],  # NOT DRAFT
         'params': {
             'tweet_type': '{sub_type}',
             'timeline_type': 'ALL',
             'sort_by': ['created_at-desc'],
             'with_deleted': '{with_deleted}',
             'count': 1000,
-            'cursor': None # NOT include_mentions_and_replies
+            'cursor': None  # NOT include_mentions_and_replies
         }
     },
     # Reference: https://developer.twitter.com/en/docs/twitter-ads-api/campaign-management/api-reference/tracking-tags
@@ -542,16 +644,92 @@ STREAMS = {
             'replication_keys': ['updated_at'],
             'datetime_format': '%a %b %d %H:%M:%S %z %Y',
             'params': {
-                'account_id': '{sub_type}',
+                'account_id': '{account_id}',
                 'sort_by': ['updated_at-desc'],
                 'with_deleted': '{with_deleted}',
                 'count': 1000,
                 'cursor': None  # NOT include_mentions_and_replies
             }
         },
+    # Reference: https://developer.twitter.com/en/docs/twitter-ads-api/measurement/api-reference/web-event-tags
+    'web_event_tags': {
+        'path': 'accounts/{account_id}/web_event_tags',
+        'data_key': 'data',
+        'key_properties': ['id'],
+        'replication_method': 'FULL_TABLE',
+        'params': {}
+    },
 
 }
 # pylint: enable=line-too-long
+
+REPORTS = {
+    # Reference: https://developer.twitter.com/en/docs/twitter-ads-api/analytics/api-reference/asynchronous
+
+    # SEGMENTS
+    # ['AGE', 'AMPLIFY_MARKETPLACE_PREROLL_VIDEOS', 'AMPLIFY_PUBLISHER_TWEETS', 'APP_STORE_CATEGORY',
+    # 'AUDIENCES', 'CONVERSATIONS', 'CONVERSION_TAGS', 'DEVICES', 'EVENTS', 'GENDER', 'INTERESTS',
+    # 'KEYWORDS', 'LANGUAGES', 'LOCATIONS', 'METROS', 'PLATFORM_VERSIONS', 'PLATFORMS', 'POSTAL_CODES',
+    # 'REGIONS', 'SIMILAR_TO_FOLLOWERS_OF_USER', 'SWIPEABLE_MEDIA', 'TV_ADS', 'TV_SHOWS']
+    "reports": [
+        # ACCOUNT INSIGHTS - not segmented
+        {
+          "name": "account_insights",
+          "entity": "ACCOUNT",
+          "segment": "NO_SEGMENT",
+          "granularity": "DAY"
+        },
+        # CAMPAIGN INSIGHTS - not segmented
+        {
+          "name": "campaign_insights",
+          "entity": "CAMPAIGN",
+          "segment": "NO_SEGMENT",
+          "granularity": "DAY"
+        },
+        # CAMPAIGN INSIGHTS - not segmented
+        {
+          "name": "funding_instrument_insights",
+          "entity": "FUNDING_INSTRUMENT",
+          "segment": "NO_SEGMENT",
+          "granularity": "DAY"
+        },
+        # LINE ITEM INSIGHTS - not segmented
+        {
+          "name": "line_item_insights",
+          "entity": "LINE_ITEM",
+          "segment": "NO_SEGMENT",
+          "granularity": "DAY"
+        },
+        # MEDIA CREATIVE INSIGHTS - not segmented
+        {
+          "name": "media_creative_insights",
+          "entity": "MEDIA_CREATIVE",
+          "segment": "NO_SEGMENT",
+          "granularity": "DAY"
+        },
+        # ORGANIC TWEET INSIGHTS - not segmented
+        {
+          "name": "organic_tweet_insights",
+          "entity": "ORGANIC_TWEET",
+          "segment": "NO_SEGMENT",
+          "granularity": "DAY"
+        },
+        # PROMOTED TWEET INSIGHTS - not segmented
+        {
+          "name": "promoted_tweet_insights",
+          "entity": "PROMOTED_TWEET",
+          "segment": "NO_SEGMENT",
+          "granularity": "DAY"
+        },
+        # PROMOTED ACCOUNT INSIGHTS - not segmented
+        {
+          "name": "promoted_account_insights",
+          "entity": "PROMOTED_ACCOUNT",
+          "segment": "NO_SEGMENT",
+          "granularity": "DAY"
+        }
+      ]
+}
 
 # De-nest children nodes for Discovery mode
 def flatten_streams():

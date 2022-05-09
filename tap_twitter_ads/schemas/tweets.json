@@ -8,6 +8,9 @@
     "id": {
       "type": ["null", "integer"]
     },
+    "name": {
+      "type": ["null", "string"]
+    },
     "id_str": {
       "type": ["null", "string"]
     },
@@ -890,3 +893,4 @@
     }
   }
 }
+

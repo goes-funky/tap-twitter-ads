@@ -1,0 +1,54 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "provider_app_event_name": {
+      "type": ["null", "string"]
+    },
+    "id": {
+      "type": ["null", "string"]
+    },
+    "app_store_identifier": {
+      "type": ["null", "string"]
+    },
+    "post_view_attribution_window": {
+      "type": ["null", "integer"]
+    },
+    "deep_link_scheme": {
+      "type": ["null", "string"]
+    },
+    "conversion_type": {
+      "type": ["null", "string"]
+    },
+    "created_at": {
+      "type": ["null", "string"],
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": ["null", "string"],
+      "format": "date-time"
+    },
+    "last_tracked_at": {
+      "type": ["null", "string"],
+      "format": "date-time"
+    },
+    "status": {
+      "type": ["null", "string"]
+    },
+    "os_type": {
+      "type": ["null", "string"]
+    },
+    "provider_app_event_id": {
+      "type": ["null", "string"]
+    },
+    "retargeting_enabled": {
+      "type": ["null", "boolean"]
+    },
+    "post_engagement_attribution_window": {
+      "type": ["null", "integer"]
+    },
+    "deleted": {
+      "type": ["null", "boolean"]
+    }
+  }
+}

@@ -19,6 +19,12 @@
         "null",
         "array"
       ]
+    },
+    "publishers_in_last_thirty_days": {
+      "type": ["null", "integer"]
+    },
+    "videos_monetized_in_last_thirty_days":  {
+      "type": ["null", "integer"]
     }
   }
 }

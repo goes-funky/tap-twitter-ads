@@ -16,7 +16,10 @@ This tap:
 - Extracts the following normal GET endpoints:
   - [account_media](https://developer.twitter.com/en/docs/ads/creatives/api-reference/account-media#account-media)
   - [accounts](https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/accounts#accounts)
+  - [account apps](https://developer.twitter.com/en/docs/twitter-ads-api/campaign-management/api-reference/account-apps)
   - [advertiser_business_categories](https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/advertiser-business-categories#advertiser-business-categories)
+  - [app_event_tags](https://developer.twitter.com/en/docs/twitter-ads-api/measurement/api-reference/app-event-tags)
+  - [audience_estimate](https://developer.twitter.com/en/docs/twitter-ads-api/campaign-management/api-reference/audience-summary)
   - [campaigns](https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/campaigns#campaigns)
   - **cards**:
     - [image_app_download](https://developer.twitter.com/en/docs/ads/creatives/api-reference/image-app-download#image-app-download-cards)
@@ -29,6 +32,7 @@ This tap:
     - [video_website](https://developer.twitter.com/en/docs/ads/creatives/api-reference/video-website#video-website-cards)
     - [website](https://developer.twitter.com/en/docs/ads/creatives/api-reference/website#website-cards)
   - [content_categories](https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/content-categories#content-categories)
+  - [custom_audiences](https://developer.twitter.com/en/docs/twitter-ads-api/audiences/api-reference/custom-audiences)
   - [funding_instruments](https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/funding-instruments#funding-instruments)
   - [iab_categories](https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/iab-categories#iab-categories)
   - [line_item_apps](https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/line-item-apps#line-item-apps)
@@ -40,9 +44,11 @@ This tap:
   - [promoted_accounts](https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/promoted-accounts#promoted-accounts)
   - [promoted_tweets](https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/promoted-tweets#promoted-tweets)
   - [scheduled_promoted_tweets](https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/scheduled-promoted-tweets#scheduled-promoted-tweets)
+  - [scheduled_tweets](https://developer.twitter.com/en/docs/twitter-ads-api/creatives/api-reference/scheduled-tweets)
   - [tailored_audiences](https://developer.twitter.com/en/docs/ads/audiences/api-reference/tailored-audiences#tailored-audiences)
   - [tweets](https://developer.twitter.com/en/docs/ads/creatives/api-reference/tweets#get-accounts-account-id-scoped-timeline) (scheduled and published, not draft)
   - [tracking_tags](https://developer.twitter.com/en/docs/twitter-ads-api/campaign-management/api-reference/tracking-tags)
+  - [web_event_tags](https://developer.twitter.com/en/docs/twitter-ads-api/measurement/api-reference/web-event-tags)
 
 - Extracts the following targeting GET endpoints:
   - [targeting_conversations](https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/targeting-options#get-targeting-criteria-conversations)

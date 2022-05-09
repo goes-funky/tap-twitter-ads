@@ -1,0 +1,62 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "id": {
+      "type": ["null", "integer"]
+    },
+    "tweet_id": {
+      "type": ["null", "string"]
+    },
+    "name": {
+      "type": ["null", "string"]
+    },
+    "id_str": {
+      "type": ["null", "string"]
+    },
+    "user_id": {
+      "type": ["null", "string"]
+    },
+    "created_at": {
+      "type": ["null", "string"],
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": ["null", "string"],
+      "format": "date-time"
+    },
+    "scheduled_at": {
+      "type": ["null", "string"],
+      "format": "date-time"
+    },
+    "completed_at": {
+      "type": ["null", "string"],
+      "format": "date-time"
+    },
+    "scheduled_status": {
+      "type": ["null", "string"]
+    },
+    "text": {
+      "type": ["null", "string"]
+    },
+    "nullcast": {
+      "type": ["null", "boolean"]
+    },
+    "media_keys": {
+      "items": {
+        "type": [
+          "null",
+          "string"
+        ]
+      },
+      "type": [
+        "null",
+        "array"
+      ]
+    },
+    "card_uri": {
+      "type": ["null", "string"]
+    }
+  }
+}
+

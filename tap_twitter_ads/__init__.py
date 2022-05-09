@@ -8,6 +8,7 @@ import singer
 from singer import metadata, utils
 from tap_twitter_ads.discover import discover
 from tap_twitter_ads.sync import sync
+from tap_twitter_ads.streams import REPORTS
 
 
 LOGGER = singer.get_logger()
@@ -57,7 +58,7 @@ def main():
 
     catalog = parsed_args.catalog
 
-    reports = config.get('reports', {})
+    reports = REPORTS.get('reports', {})
 
     if parsed_args.discover:
         do_discover(reports)

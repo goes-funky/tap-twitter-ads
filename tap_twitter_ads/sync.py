@@ -14,7 +14,7 @@ from twitter_ads.error import Error
 from twitter_ads.utils import split_list
 
 from tap_twitter_ads.transform import transform_record, transform_report
-from tap_twitter_ads.streams import flatten_streams
+from tap_twitter_ads.streams import flatten_streams, REPORTS
 
 
 LOGGER = singer.get_logger()
@@ -23,8 +23,8 @@ ADS_API_URL = 'https://ads-api.twitter.com'
 
 # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/overview/placements#placements
 PLACEMENTS = [
-    'ALL_ON_TWITTER', # All possible placement types on Twitter
-    'PUBLISHER_NETWORK' # On the Twitter Audience Platform
+    'ALL_ON_TWITTER',  # All possible placement types on Twitter
+    'PUBLISHER_NETWORK'  # On the Twitter Audience Platform
 ]
 
 
@@ -92,7 +92,7 @@ def obj_to_dict(obj):
 def get_resource(stream_name, client, path, params=None):
     resource = '/{}/{}'.format(API_VERSION, path)
     try:
-        request = Request(client, 'get', resource, params=params) #, stream=True)
+        request = Request(client, 'get', resource, params=params)
     except Error as err:
         # see twitter_ads.error for more details
         LOGGER.error('Stream: {} - ERROR: {}'.format(stream_name, err.details))
@@ -109,7 +109,7 @@ def post_resource(report_name, client, path, params=None, body=None):
         # see twitter_ads.error for more details
         LOGGER.error('Report: {} - ERROR: {}'.format(report_name, err.details))
         raise err
-    response_body = response.body # Dictionary response of POST request
+    response_body = response.body  # Dictionary response of POST request
     return response_body
 
 
@@ -197,14 +197,15 @@ def sync_endpoint(client,
     if child_streams is None:
         child_streams = []
 
-    # tap config variabless
+    # tap config variables
     # Twitter Ads does not accept True/False as boolean, must be true/false
     with_deleted = tap_config.get('with_deleted', 'true')
     country_codes = tap_config.get('country_codes', '').replace(' ', '')
     country_code_list = country_codes.split(',')
-    LOGGER.info('country_code_list = {}'.format(country_code_list)) # COMMENT OUT
+    LOGGER.info('country_code_list = {}'.format(country_code_list))  # COMMENT OUT
     if sub_types == ['{country_code_list}']:
         sub_types = country_code_list
+
     LOGGER.info('sub_types = {}'.format(sub_types)) # COMMENT OUT
 
     # Bookmark datetimes
@@ -246,6 +247,8 @@ def sync_endpoint(client,
                     new_val = val.replace('{with_deleted}', with_deleted)
                 if '{account_ids}' in val:
                     new_val = val.replace('{account_ids}', account_id)
+                if '{account_id}' in val:
+                    new_val = val.replace('{account_id}', account_id)
                 if '{parent_ids}' in val:
                     new_val = val.replace('{parent_ids}', parent_id_list)
                 if '{start_date}' in val:
@@ -254,9 +257,22 @@ def sync_endpoint(client,
                     new_val = val.replace('{country_codes}', country_codes)
                 if '{sub_type}' in val:
                     new_val = val.replace('{sub_type}', sub_type)
+                if '{targeting_criteria}' in val:
+                    targeting_criteria = []
+                    # [
+                    #     {
+                    #         "targeting_type": "LOCATION",
+                    #         "targeting_value": "96683cc9126741d1"
+                    #     },
+                    #     {
+                    #         "targeting_type": "BROAD_KEYWORD",
+                    #         "targeting_value": "cats"
+                    #     },
+                    # ]
+                    new_val = val.replace('{targeting_criteria}', targeting_criteria)
             new_params[key] = new_val
-        LOGGER.info('Stream: {} - Request URL: {}/{}/{}'.format(
-            stream_name, ADS_API_URL, API_VERSION, path))
+
+        LOGGER.info('Stream: {} - Request URL: {}/{}/{}'.format(stream_name, ADS_API_URL, API_VERSION, path))
         LOGGER.info('Stream: {} - Request params: {}'.format(stream_name, new_params))
 
         # API Call
@@ -740,7 +756,6 @@ def sync_report(client,
     # 4. GET ASYNC Job Statuses and Download URLs (when complete)
     # 5. Download Data from URLs and Sync data to target
 
-    # report parameters
     report_entity = report_config.get('entity')
     report_segment = report_config.get('segment', 'NO_SEGMENT')
     report_granularity = report_config.get('granularity', 'DAY')
@@ -1001,7 +1016,7 @@ def sync(client, config, catalog, state):
     account_list = config.get('account_ids').replace(' ', '').split(',')
     country_code_list = config.get('country_codes', 'US').replace(' ', '').split(',')
     start_date = config.get('start_date')
-    reports = config.get('reports', [])
+    reports = REPORTS.get('reports', [])
 
     # Get selected_streams from catalog, based on state last_stream
     #   last_stream = Previous currently synced stream, if the load was interrupted
@@ -1022,7 +1037,7 @@ def sync(client, config, catalog, state):
     child_streams = []
     # Get all streams (parent + child) from streams.py
     flat_streams = flatten_streams()
-    # Loop thru all streams
+    # Loop through all streams
     for stream_name, stream_metadata in flat_streams.items():
         # If stream has a parent_stream, then it is a child stream
         parent_stream = stream_metadata.get('parent_stream')
@@ -1038,7 +1053,7 @@ def sync(client, config, catalog, state):
     LOGGER.info('Sync Parent Streams: {}'.format(parent_streams))
     LOGGER.info('Sync Child Streams: {}'.format(child_streams))
 
-    # Get list of report streams to sync (from config and catalog)
+    # Get list of report streams to sync
     report_streams = []
     for report in reports:
         report_name = report.get('name')
@@ -1057,6 +1072,7 @@ def sync(client, config, catalog, state):
             if not child_stream:
                 LOGGER.info('Skipping child stream {} not found in catalog.'.format(stream_name))
                 continue
+                # LOGGER.info('Adding stream {} as not found in catalog.'.format(stream_name))
 
             update_currently_syncing(state, stream_name)
             endpoint_config = flat_streams.get(stream_name)
