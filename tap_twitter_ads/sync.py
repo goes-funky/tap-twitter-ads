@@ -1096,17 +1096,16 @@ def sync(client, config, catalog, state):
             # GET country_ids (targeting_values) based on config country_codes
             country_ids = []
             country_path = 'targeting_criteria/locations'
-            for country_code in country_code_list:
-                country_params = {
-                    'count': 1000,
-                    'cursor': None,
-                    'location_type': 'COUNTRIES',
-                    'country_code': country_code
-                }
-                country_cursor = get_resource('countries', client, country_path, country_params)
-                for country in country_cursor:
-                    country_id = country['targeting_value']
-                    country_ids.append(country_id)
+            # Get all country codes
+            country_params = {
+                'count': 1000,
+                'cursor': None,
+                'location_type': 'COUNTRIES'
+            }
+            country_cursor = get_resource('countries', client, country_path, country_params)
+            for country in country_cursor:
+                country_id = country['targeting_value']
+                country_ids.append(country_id)
             LOGGER.info('Countries - Country Codes: {}, Country Targeting IDs: {}'.format(
                 country_code_list, country_ids))
 
