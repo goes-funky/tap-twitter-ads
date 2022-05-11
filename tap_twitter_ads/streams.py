@@ -310,7 +310,7 @@ STREAMS = {
                         'key_properties': ['audience_size'],
                         'replication_method': 'INCREMENTAL',
                         'replication_keys': ['updated_at'],
-                        'parent_ids_limit': 200,
+                        'parent_ids_limit': 10,
                         'params': {
                             # fetch as param targeting criteria
                             'targeting_criteria': '{targeting_criteria}',
