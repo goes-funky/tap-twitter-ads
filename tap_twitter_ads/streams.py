@@ -92,56 +92,6 @@ STREAMS = {
             'cursor': None
         }
     },
-    # Reference: https://developer.twitter.com/en/docs/twitter-ads-api/campaign-management/api-reference/line-items
-    # -summary
-    # TODO - audience_estimate !
-    'audience_estimate': {
-        'path': 'accounts/{account_id}/line_items',
-        'data_key': 'data',
-        'key_properties': ['id'],
-        'replication_method': 'INCREMENTAL',
-        'replication_keys': ['updated_at'],
-        'params': {
-            'sort_by': ['updated_at-desc'],
-            'with_deleted': '{with_deleted}',
-            'count': 1000,
-            'cursor': None
-        },
-        'children': {
-            # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/targeting-criteria#targeting-criteria
-            'targeting_criteria': {
-                'path': 'accounts/{account_id}/targeting_criteria',
-                'data_key': 'data',
-                'key_properties': ['line_item_id', 'id'],
-                'replication_method': 'FULL_TABLE',
-                'parent_ids_limit': 200,
-                'params': {
-                    'line_item_ids': '{parent_ids}',  # up to 200 comma delim ids
-                    'with_deleted': '{with_deleted}',
-                    'count': 1000,
-                    'cursor': None
-                },
-                'children': {
-                    # Reference: https://developer.twitter.com/en/docs/twitter-ads-api/campaign-management/api-reference/audience-summary
-                    'audience_estimate': {
-                        'path': '/accounts/{account_id}/audience_estimate',
-                        'data_key': 'data',
-                        'key_properties': ['id'],
-                        'replication_method': 'INCREMENTAL',
-                        'replication_keys': ['updated_at'],
-                        'params': {
-                            # fetch as param targeting criteria
-                            'targeting_criteria': '{targeting_criteria}',
-                            'sort_by': ['updated_at-desc'],
-                            'with_deleted': '{with_deleted}',
-                            'count': 1000,
-                            'cursor': None
-                        }
-                    },
-                }
-            }
-        }
-        },
     # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/campaigns#campaigns
     'campaigns': {
         'path': 'accounts/{account_id}/campaigns',
@@ -342,7 +292,7 @@ STREAMS = {
             'targeting_criteria': {
                 'path': 'accounts/{account_id}/targeting_criteria',
                 'data_key': 'data',
-                'key_properties': ['line_item_id', 'id'],
+                'key_properties': ['line_item_id', 'id', 'targeting_type', 'targeting_value'],
                 'replication_method': 'FULL_TABLE',
                 'parent_ids_limit': 200,
                 'params': {
@@ -350,6 +300,27 @@ STREAMS = {
                     'with_deleted': '{with_deleted}',
                     'count': 1000,
                     'cursor': None
+                },
+                'children': {
+                    # Reference: https://developer.twitter.com/en/docs/twitter-ads-api/campaign-management/api-reference/audience-summary
+                    'audience_estimate': {
+                        'path': 'accounts/{account_id}/audience_estimate',  # ->  Forbidden - INSUFFICIENT_CLIENT_APPLICATION_PERMISSION
+                        # 'path': 'accounts/{account_id}/audience_summary',
+                        'data_key': 'data',
+                        'key_properties': ['audience_size'],
+                        'replication_method': 'INCREMENTAL',
+                        'replication_keys': ['updated_at'],
+                        'parent_ids_limit': 200,
+                        'params': {
+                            # fetch as param targeting criteria
+                            'targeting_criteria': '{targeting_criteria}',
+                            'sort_by': ['updated_at-desc'],
+                            'with_deleted': '{with_deleted}',
+                            'count': 1000,
+                            'cursor': None,
+                            'method': 'post'
+                        }
+                    }
                 }
             }
         }
@@ -731,6 +702,7 @@ REPORTS = {
       ]
 }
 
+
 # De-nest children nodes for Discovery mode
 def flatten_streams():
     flat_streams = {}
@@ -743,4 +715,10 @@ def flatten_streams():
             for child_stream_name, child_endpoint_config in children.items():
                 flat_streams[child_stream_name] = child_endpoint_config
                 flat_streams[child_stream_name]['parent_stream'] = stream_name
+                grandchildren = child_endpoint_config.get('children')
+                if grandchildren:
+                    for grandchild_stream_name, grandchild_endpoint_config in grandchildren.items():
+                        flat_streams[grandchild_stream_name] = grandchild_endpoint_config
+                        flat_streams[grandchild_stream_name]['parent_stream'] = child_stream_name
+                        flat_streams[grandchild_stream_name]['grandparent_stream'] = stream_name
     return flat_streams

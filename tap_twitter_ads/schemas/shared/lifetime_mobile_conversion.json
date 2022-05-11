@@ -1,0 +1,51 @@
+{
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "mobile_conversion_lifetime_value_purchases": {
+      "$ref": "mobile_conversion.json"
+    },
+    "mobile_conversion_lifetime_value_sign_ups": {
+      "$ref": "mobile_conversion.json"
+    },
+    "mobile_conversion_lifetime_value_updates": {
+      "$ref": "mobile_conversion.json"
+    },
+    "mobile_conversion_lifetime_value_tutorials_completed": {
+      "$ref": "mobile_conversion.json"
+    },
+    "mobile_conversion_lifetime_value_reservations": {
+      "$ref": "mobile_conversion.json"
+    },
+    "mobile_conversion_lifetime_value_add_to_carts": {
+      "$ref": "mobile_conversion.json"
+    },
+    "mobile_conversion_lifetime_value_checkouts_initiated": {
+      "$ref": "mobile_conversion.json"
+    },
+    "mobile_conversion_lifetime_value_add_to_wishlists": {
+      "$ref": "mobile_conversion.json"
+    },
+    "mobile_conversion_lifetime_value_levels_achieved": {
+      "$ref": "mobile_conversion.json"
+    },
+    "mobile_conversion_lifetime_value_achievements_unlocked": {
+      "$ref": "mobile_conversion.json"
+    },
+    "mobile_conversion_lifetime_value_shares": {
+      "$ref": "mobile_conversion.json"
+    },
+    "mobile_conversion_lifetime_value_invites": {
+      "$ref": "mobile_conversion.json"
+    },
+    "mobile_conversion_lifetime_value_payment_info_additions": {
+      "$ref": "mobile_conversion.json"
+    },
+    "mobile_conversion_lifetime_value_spent_credits": {
+      "$ref": "mobile_conversion.json"
+    },
+    "mobile_conversion_lifetime_value_rates": {
+      "$ref": "mobile_conversion.json"
+    }
+  }
+}

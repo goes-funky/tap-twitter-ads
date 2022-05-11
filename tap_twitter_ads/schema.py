@@ -74,10 +74,11 @@ def load_shared_schema_refs():
 
 
 def resolve_schema_references(schema, refs):
-    if '$ref' in schema['properties']:
-        link = schema['properties']['$ref']
-        schema['properties'].update(refs[link])
-        schema['properties']['$ref']
+    for property, value in schema['properties'].items():
+        if '$ref' in value:
+            link = schema['properties'][property]['$ref']
+            schema['properties'][property].update(refs[link])
+            schema['properties'][property].pop('$ref')
 
 
 def get_schemas(reports):

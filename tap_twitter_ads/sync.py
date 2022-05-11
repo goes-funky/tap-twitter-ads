@@ -89,10 +89,10 @@ def obj_to_dict(obj):
 # pylint: disable=line-too-long
 # API SDK Requests: https://github.com/twitterdev/twitter-python-ads-sdk/blob/master/examples/manual_request.py
 # pylint: enable=line-too-long
-def get_resource(stream_name, client, path, params=None):
+def get_resource(stream_name, client, path, params=None, method='get'):
     resource = '/{}/{}'.format(API_VERSION, path)
     try:
-        request = Request(client, 'get', resource, params=params)
+        request = Request(client, method, resource, params=params)
     except Error as err:
         # see twitter_ads.error for more details
         LOGGER.error('Stream: {} - ERROR: {}'.format(stream_name, err.details))
@@ -186,6 +186,10 @@ def sync_endpoint(client,
     LOGGER.info('Stream: {} - endpoint_config: {}'.format(stream_name, endpoint_config))
     id_fields = endpoint_config.get('key_properties', [])
     parent_id_field = next(iter(id_fields), None)  # first ID field
+    targeting_criteria = []
+    if 'targeting_type' and 'targeting_value' in id_fields:
+        parent_id_field = ['targeting_type', 'targeting_value']
+
     params = endpoint_config.get('params', {})
     bookmark_field = next(iter(endpoint_config.get('replication_keys', [])), None)
     datetime_format = endpoint_config.get('datetime_format')
@@ -202,11 +206,8 @@ def sync_endpoint(client,
     with_deleted = tap_config.get('with_deleted', 'true')
     country_codes = tap_config.get('country_codes', '').replace(' ', '')
     country_code_list = country_codes.split(',')
-    LOGGER.info('country_code_list = {}'.format(country_code_list))  # COMMENT OUT
     if sub_types == ['{country_code_list}']:
         sub_types = country_code_list
-
-    LOGGER.info('sub_types = {}'.format(sub_types)) # COMMENT OUT
 
     # Bookmark datetimes
     last_datetime = get_bookmark(state, stream_name, start_date)
@@ -220,7 +221,7 @@ def sync_endpoint(client,
     total_records = 0
     # Loop through sub_types (for tweets endpoint), all other endpoints loop once
     for sub_type in sub_types:
-        LOGGER.info('sub_type = {}'.format(sub_type)) # COMMENT OUT
+        LOGGER.info('sub_type = {}'.format(sub_type))  # COMMENT OUT
 
         # Reset params and path for each sub_type
         params = {}
@@ -230,14 +231,18 @@ def sync_endpoint(client,
         path = endpoint_config.get('path')
 
         # Replace keys/ids in path and params
-        add_account_id = False # Initial default
+        add_account_id = False  # Initial default
         if '{account_id}' in path:
             add_account_id = True
             path = path.replace('{account_id}', account_id)
 
+        parent_id_list = []
         if parent_ids:
             parent_id_list = ','.join(map(str, parent_ids))
             path = path.replace('{parent_ids}', parent_id_list)
+            if 'targeting_criteria' in params:
+                targeting_criteria = parent_ids
+            parent_ids = []
         key = None
         val = None
         for key, val in list(params.items()):
@@ -257,16 +262,19 @@ def sync_endpoint(client,
                     new_val = val.replace('{country_codes}', country_codes)
                 if '{sub_type}' in val:
                     new_val = val.replace('{sub_type}', sub_type)
-                if '{targeting_criteria}' in val:
-                    targeting_criteria = []
-                    new_val = val.replace('{targeting_criteria}', targeting_criteria)
+                if key == 'targeting_criteria':
+                    new_val = targeting_criteria
             new_params[key] = new_val
 
         LOGGER.info('Stream: {} - Request URL: {}/{}/{}'.format(stream_name, ADS_API_URL, API_VERSION, path))
         LOGGER.info('Stream: {} - Request params: {}'.format(stream_name, new_params))
 
         # API Call
-        cursor = get_resource(stream_name, client, path, new_params)
+        method = 'get'
+        if 'method' in new_params:
+            method = new_params['method']
+            new_params.pop('method')
+        cursor = get_resource(stream_name, client, path, new_params, method)
 
         # time_extracted: datetime when the data was extracted from the API
         time_extracted = utils.now()
@@ -345,8 +353,18 @@ def sync_endpoint(client,
                     counter.increment()
 
                 # Append parent_id to parent_ids
-                parent_id = record_dict.get(parent_id_field)
-                parent_ids.append(parent_id)
+                if isinstance(parent_id_field, list):
+                    parentfield = {}
+                    for parent_field in parent_id_field:
+                        parentfield[parent_field] = record_dict.get(parent_field)
+
+                    if parentfield not in parent_ids:
+                        targeting_criteria.append(parentfield)
+                        parent_id = targeting_criteria
+                        parent_ids.extend(parent_id)
+                else:
+                    parent_id = record_dict.get(parent_id_field)
+                    parent_ids.append(parent_id)
 
                 # Increment counters
                 i = i + 1
@@ -363,6 +381,14 @@ def sync_endpoint(client,
                     # pylint: disable=line-too-long
                     LOGGER.info('Child Stream: {} - START Syncing, parent_stream: {}, account_id: {}'.format(
                         child_stream_name, stream_name, account_id))
+
+                    # add child stream to catalog with discover
+                    if not catalog.get_stream(child_stream_name):
+                        LOGGER.info('Adding child stream {} as not found in catalog.'.format(stream_name))
+                        from tap_twitter_ads import discover
+                        schild_stream_schema = discover(stream=child_stream_name)
+                        catalog.streams.extend(schild_stream_schema.streams)
+
                     # pylint: enable=line-too-long
                     # Write schema and log selected fields for stream
                     write_schema(catalog, child_stream_name)
@@ -374,7 +400,7 @@ def sync_endpoint(client,
                     child_total_records = 0
                     # parent_id_limit: max list size for parent_ids
                     parent_id_limit = child_endpoint_config.get('parent_ids_limit', 1)
-                    chunk = 0 # chunk number
+                    chunk = 0  # chunk number
                     # Make chunks of parent_ids
                     for chunk_ids in split_list(parent_ids, parent_id_limit):
                         # pylint: disable=line-too-long
@@ -414,8 +440,9 @@ def sync_endpoint(client,
             # End: if children
 
         # pylint: disable=line-too-long
-        LOGGER.info('Stream: {}, Account ID: {} - FINISHED Sub Type: {}, Total Sub Type Records: {}'.format(
-            stream_name, account_id, sub_type, i))
+        if sub_type and sub_type != 'none':
+            LOGGER.info('Stream: {}, Account ID: {} - FINISHED Sub Type: {}, Total Sub Type Records: {}'.format(
+                stream_name, account_id, sub_type, i))
         # pylint: enable=line-too-long
         # End: for sub_type in sub_types
 
@@ -1008,11 +1035,6 @@ def sync(client, config, catalog, state):
     start_date = config.get('start_date')
     reports = REPORTS.get('reports', [])
 
-    # Get selected_streams from catalog, based on state last_stream
-    #   last_stream = Previous currently synced stream, if the load was interrupted
-    last_stream = singer.get_currently_syncing(state)
-    LOGGER.info('Last/Currently Syncing Stream: {}'.format(last_stream))
-
     # Get ALL selected streams from catalog
     selected_streams = []
     for stream in catalog.get_selected_streams(state):
@@ -1031,17 +1053,26 @@ def sync(client, config, catalog, state):
     for stream_name, stream_metadata in flat_streams.items():
         # If stream has a parent_stream, then it is a child stream
         parent_stream = stream_metadata.get('parent_stream')
+        grandparent_stream = stream_metadata.get('grandparent_stream')
         # Append selected parent streams
         if not parent_stream and stream_name in selected_streams:
             parent_streams.append(stream_name)
         # Append selected child streams
         elif parent_stream and stream_name in selected_streams:
-            child_streams.append(stream_name)
             # Append un-selected parent streams of selected children
             if parent_stream not in selected_streams:
-                parent_streams.append(parent_stream)
-    LOGGER.info('Sync Parent Streams: {}'.format(parent_streams))
-    LOGGER.info('Sync Child Streams: {}'.format(child_streams))
+                if grandparent_stream:
+                    parent_streams.append(grandparent_stream)
+                    child_streams.append(parent_stream)
+                    LOGGER.info('Sync GrandParent Stream: {}'.format(parent_streams))
+                else:
+                    parent_streams.append(parent_stream)
+            child_streams.append(stream_name)
+
+    if parent_streams:
+        LOGGER.info('Sync Parent Streams: {}'.format(parent_streams))
+    if child_streams:
+        LOGGER.info('Sync Child Streams: {}'.format(child_streams))
 
     # Get list of report streams to sync
     report_streams = []
@@ -1049,7 +1080,8 @@ def sync(client, config, catalog, state):
         report_name = report.get('name')
         if report_name in selected_streams:
             report_streams.append(report_name)
-    LOGGER.info('Sync Report Streams: {}'.format(report_streams))
+    if report_streams:
+        LOGGER.info('Sync Report Streams: {}'.format(report_streams))
 
     # ACCOUNT_ID OUTER LOOP
     for account_id in account_list:
@@ -1060,9 +1092,11 @@ def sync(client, config, catalog, state):
             child_stream = catalog.get_stream(stream_name)
             # child_stream is not in catalog
             if not child_stream:
-                LOGGER.info('Skipping child stream {} not found in catalog.'.format(stream_name))
-                continue
-                # LOGGER.info('Adding stream {} as not found in catalog.'.format(stream_name))
+                # add parent stream to catalog with discover
+                LOGGER.info('Adding parent stream {} as not found in catalog.'.format(stream_name))
+                from tap_twitter_ads import discover
+                parent_stream_schema = discover(stream=stream_name)
+                catalog.streams.extend(parent_stream_schema.streams)
 
             update_currently_syncing(state, stream_name)
             endpoint_config = flat_streams.get(stream_name)
@@ -1123,36 +1157,37 @@ def sync(client, config, catalog, state):
             LOGGER.info('Platforms - Platform Targeting IDs: {}'.format(platform_ids))
 
         # REPORT STREAMS LOOP
-        for report in reports:
-            report_name = report.get('name')
-            if report_name in report_streams:
-                update_currently_syncing(state, report_name)
+        if report_streams:
+            for report in reports:
+                report_name = report.get('name')
+                if report_name in report_streams:
+                    update_currently_syncing(state, report_name)
 
-                LOGGER.info('Report: {} - START Syncing for Account ID: {}'.format(
-                    report_name, account_id))
+                    LOGGER.info('Report: {} - START Syncing for Account ID: {}'.format(
+                        report_name, account_id))
 
-                # Write schema and log selected fields for stream
-                write_schema(catalog, report_name)
+                    # Write schema and log selected fields for stream
+                    write_schema(catalog, report_name)
 
-                selected_fields = get_selected_fields(catalog, report_name)
-                LOGGER.info('Report: {} - selected_fields: {}'.format(
-                    report_name, selected_fields))
+                    selected_fields = get_selected_fields(catalog, report_name)
+                    LOGGER.info('Report: {} - selected_fields: {}'.format(
+                        report_name, selected_fields))
 
-                total_records = sync_report(client=client,
-                                            catalog=catalog,
-                                            state=state,
-                                            start_date=start_date,
-                                            report_name=report_name,
-                                            report_config=report,
-                                            tap_config=config,
-                                            account_id=account_id,
-                                            country_ids=country_ids,
-                                            platform_ids=platform_ids)
+                    total_records = sync_report(client=client,
+                                                catalog=catalog,
+                                                state=state,
+                                                start_date=start_date,
+                                                report_name=report_name,
+                                                report_config=report,
+                                                tap_config=config,
+                                                account_id=account_id,
+                                                country_ids=country_ids,
+                                                platform_ids=platform_ids)
 
-                # pylint: disable=line-too-long
-                LOGGER.info('Report: {} - FINISHED Syncing for Account ID: {}, Total Records: {}'.format(
-                    report_name, account_id, total_records))
-                # pylint: enable=line-too-long
-                update_currently_syncing(state, None)
+                    # pylint: disable=line-too-long
+                    LOGGER.info('Report: {} - FINISHED Syncing for Account ID: {}, Total Records: {}'.format(
+                        report_name, account_id, total_records))
+                    # pylint: enable=line-too-long
+                    update_currently_syncing(state, None)
 
         LOGGER.info('Account ID: {} - FINISHED Syncing'.format(account_id))

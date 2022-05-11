@@ -2,7 +2,7 @@ from singer.catalog import Catalog, CatalogEntry, Schema
 from tap_twitter_ads.schema import get_schemas
 
 
-def discover(reports):
+def discover(reports=[], stream=None):
     schemas, field_metadata = get_schemas(reports)
     catalog = Catalog([])
 
@@ -16,12 +16,12 @@ def discover(reports):
                 table_metadata = entry.get('metadata', {})
         key_properties = table_metadata.get('table-key-properties')
 
-        catalog.streams.append(CatalogEntry(
-            stream=stream_name,
-            tap_stream_id=stream_name,
-            key_properties=key_properties,
-            schema=schema,
-            metadata=mdata
-        ))
-
+        if not stream or stream == stream_name:
+            catalog.streams.append(CatalogEntry(
+                stream=stream_name,
+                tap_stream_id=stream_name,
+                key_properties=key_properties,
+                schema=schema,
+                metadata=mdata
+            ))
     return catalog

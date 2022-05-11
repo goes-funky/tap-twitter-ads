@@ -2,10 +2,8 @@
 
 import sys
 import json
-import argparse
 from twitter_ads.client import Client
 import singer
-from singer import metadata, utils
 from tap_twitter_ads.discover import discover
 from tap_twitter_ads.sync import sync
 from tap_twitter_ads.streams import REPORTS
@@ -21,6 +19,7 @@ REQUIRED_CONFIG_KEYS = [
     'access_token_secret',
     'account_ids'
 ]
+
 
 def do_discover(reports):
     LOGGER.info('Starting discover')
@@ -44,13 +43,13 @@ def main():
         access_token=config.get('access_token'),
         access_token_secret=config.get('access_token_secret'),
         options={
-            'handle_rate_limit': True, # Handles 429 errors
+            'handle_rate_limit': True,  # Handles 429 errors
             'retry_max': 10,
-            'retry_delay': 60000, # milliseconds, wait 1 minute for each retry
+            'retry_delay': 60000,  # milliseconds, wait 1 minute for each retry
             # Error codes: https://developer.twitter.com/en/docs/basics/response-codes
             'retry_on_status': [400, 420, 500, 502, 503, 504],
             'retry_on_timeouts': True,
-            'timeout': (5.0, 10.0)}) # Tuple: (connect, read) timeout in seconds
+            'timeout': (5.0, 10.0)})  # Tuple: (connect, read) timeout in seconds
 
     state = {}
     if parsed_args.state:
@@ -67,6 +66,7 @@ def main():
              config=config,
              catalog=catalog,
              state=state)
+
 
 if __name__ == '__main__':
     main()
