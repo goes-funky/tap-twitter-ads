@@ -179,7 +179,8 @@ def sync_endpoint(client,
                   tap_config,
                   account_id=None,
                   parent_ids=None,
-                  child_streams=None):
+                  child_streams=None,
+                  selected_streams=None):
 
     # endpoint_config variables
     path = endpoint_config.get('path')
@@ -331,7 +332,7 @@ def sync_endpoint(client,
 
                 # Check for PK fields
                 for key in id_fields:
-                    if not record_dict.get(key):
+                    if key not in record_dict:
                         LOGGER.info('Stream: {} - Missing key {} in record: {}'.format(
                             stream_name, key, record))
 
@@ -349,7 +350,9 @@ def sync_endpoint(client,
                         schema,
                         stream_metadata)
 
-                    write_record(stream_name, transformed_record, time_extracted=time_extracted)
+                    # Process one stream at a time
+                    if stream_name in selected_streams:
+                        write_record(stream_name, transformed_record, time_extracted=time_extracted)
                     counter.increment()
 
                 # Append parent_id to parent_ids
@@ -418,7 +421,8 @@ def sync_endpoint(client,
                             tap_config=tap_config,
                             account_id=account_id,
                             parent_ids=chunk_ids,
-                            child_streams=child_streams)
+                            child_streams=child_streams,
+                            selected_streams=selected_streams)
 
                         # pylint: disable=line-too-long
                         LOGGER.info('Child Stream: {} - Finished chunk#: {}, parent_stream: {}'.format(
@@ -1118,7 +1122,8 @@ def sync(client, config, catalog, state):
                                           endpoint_config=endpoint_config,
                                           tap_config=config,
                                           account_id=account_id,
-                                          child_streams=child_streams)
+                                          child_streams=child_streams,
+                                          selected_streams=selected_streams)
 
             LOGGER.info('Stream: {} - FINISHED Syncing, Account ID: {}, Total Records: {}'.format(
                 stream_name, account_id, total_records))

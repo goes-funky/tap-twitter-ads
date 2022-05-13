@@ -424,7 +424,7 @@ STREAMS = {
         'params': {
             'sort_by': ['updated_at-desc'],
             'with_deleted': '{with_deleted}',
-            'count': 1000,
+            'count': 200,
             'cursor': None
         }
     },
@@ -580,7 +580,7 @@ STREAMS = {
                 'parent_ids_limit': 1,
                 'params': {
                     'locale': '{parent_ids}',
-                    'count': 50,
+                    'count': 1000,
                     'cursor': None
                 }
             }
