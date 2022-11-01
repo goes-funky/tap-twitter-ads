@@ -106,64 +106,72 @@ STREAMS = {
             'cursor': None
         }
     },
+    # [DEPRECATED] Website Cards endpoint
     # Reference: https://developer.twitter.com/en/docs/ads/creatives/api-reference/website#website-cards
-    'cards_website': {
-        'path': 'accounts/{account_id}/cards',
-        'data_key': 'data',
-        'key_properties': ['id'],
-        'replication_method': 'INCREMENTAL',
-        'replication_keys': ['updated_at'],
-        'params': {
-            'sort_by': ['updated_at-desc'],
-            'with_deleted': '{with_deleted}',
-            'count': 1000,
-            'cursor': None
-        }
-    },
+    # 'cards_website': {
+    #     'path': 'accounts/{account_id}/cards',
+    #     'data_key': 'data',
+    #     'key_properties': ['id'],
+    #     'replication_method': 'INCREMENTAL',
+    #     'replication_keys': ['updated_at'],
+    #     'params': {
+    #         'sort_by': ['updated_at-desc'],
+    #         'with_deleted': '{with_deleted}',
+    #         'count': 1000,
+    #         'cursor': None
+    #     }
+    # },
+
+    # [DEPRECATED] Video Website Cards endpoint
     # Reference: https://developer.twitter.com/en/docs/ads/creatives/api-reference/video-website#video-website-cards
-    'cards_video_website': {
-        'path': 'accounts/{account_id}/cards/video_website',
-        'data_key': 'data',
-        'key_properties': ['id'],
-        'replication_method': 'INCREMENTAL',
-        'replication_keys': ['updated_at'],
-        'params': {
-            'sort_by': ['updated_at-desc'],
-            'with_deleted': '{with_deleted}',
-            'count': 1000,
-            'cursor': None
-        }
-    },
+    # 'cards_video_website': {
+    #     'path': 'accounts/{account_id}/cards/video_website',
+    #     'data_key': 'data',
+    #     'key_properties': ['id'],
+    #     'replication_method': 'INCREMENTAL',
+    #     'replication_keys': ['updated_at'],
+    #     'params': {
+    #         'sort_by': ['updated_at-desc'],
+    #         'with_deleted': '{with_deleted}',
+    #         'count': 1000,
+    #         'cursor': None
+    #     }
+    # },
+
+    # [DEPRECATED] Image App Download Cards endpoint
     # Reference: https://developer.twitter.com/en/docs/ads/creatives/api-reference/image-app-download#image-app
     # -download-cards
-    'cards_image_app_download': {
-        'path': 'accounts/{account_id}/cards/image_app_download',
-        'data_key': 'data',
-        'key_properties': ['id'],
-        'replication_method': 'INCREMENTAL',
-        'replication_keys': ['updated_at'],
-        'params': {
-            'sort_by': ['updated_at-desc'],
-            'with_deleted': '{with_deleted}',
-            'count': 1000,
-            'cursor': None
-        }
-    },
+    # 'cards_image_app_download': {
+    #     'path': 'accounts/{account_id}/cards/image_app_download',
+    #     'data_key': 'data',
+    #     'key_properties': ['id'],
+    #     'replication_method': 'INCREMENTAL',
+    #     'replication_keys': ['updated_at'],
+    #     'params': {
+    #         'sort_by': ['updated_at-desc'],
+    #         'with_deleted': '{with_deleted}',
+    #         'count': 1000,
+    #         'cursor': None
+    #     }
+    # },
+
+    # [DEPRECATED] Video App Download Cards endpoint
     # Reference: https://developer.twitter.com/en/docs/ads/creatives/api-reference/video-app-download#video-app
     # -download-cards
-    'cards_video_app_download': {
-        'path': 'accounts/{account_id}/cards/video_app_download',
-        'data_key': 'data',
-        'key_properties': ['id'],
-        'replication_method': 'INCREMENTAL',
-        'replication_keys': ['updated_at'],
-        'params': {
-            'sort_by': ['updated_at-desc'],
-            'with_deleted': '{with_deleted}',
-            'count': 1000,
-            'cursor': None
-        }
-    },
+    # 'cards_video_app_download': {
+    #     'path': 'accounts/{account_id}/cards/video_app_download',
+    #     'data_key': 'data',
+    #     'key_properties': ['id'],
+    #     'replication_method': 'INCREMENTAL',
+    #     'replication_keys': ['updated_at'],
+    #     'params': {
+    #         'sort_by': ['updated_at-desc'],
+    #         'with_deleted': '{with_deleted}',
+    #         'count': 1000,
+    #         'cursor': None
+    #     }
+    # },
+
     # Reference: https://developer.twitter.com/en/docs/ads/creatives/api-reference/poll#poll-cards
     'cards_poll': {
         'path': 'accounts/{account_id}/cards/poll',
@@ -208,36 +216,41 @@ STREAMS = {
             'cursor': None
         }
     },
+
+    # [DEPRECATED] Direct Message Cards endpoint
     # Reference: https://developer.twitter.com/en/docs/ads/creatives/api-reference/image-direct-message#image-direct
     # -message-cards
-    'cards_image_direct_message': {
-        'path': 'accounts/{account_id}/cards/image_direct_message',
-        'data_key': 'data',
-        'key_properties': ['id'],
-        'replication_method': 'INCREMENTAL',
-        'replication_keys': ['updated_at'],
-        'params': {
-            'sort_by': ['updated_at-desc'],
-            'with_deleted': '{with_deleted}',
-            'count': 1000,
-            'cursor': None
-        }
-    },
+    # 'cards_image_direct_message': {
+    #     'path': 'accounts/{account_id}/cards/image_direct_message',
+    #     'data_key': 'data',
+    #     'key_properties': ['id'],
+    #     'replication_method': 'INCREMENTAL',
+    #     'replication_keys': ['updated_at'],
+    #     'params': {
+    #         'sort_by': ['updated_at-desc'],
+    #         'with_deleted': '{with_deleted}',
+    #         'count': 1000,
+    #         'cursor': None
+    #     }
+    # },
+
+    # [DEPRECATED] Direct Message Cards endpoint
     # Reference: https://developer.twitter.com/en/docs/ads/creatives/api-reference/video-direct-message#video-direct
     # -message-cards
-    'cards_video_direct_message': {
-        'path': 'accounts/{account_id}/cards/video_direct_message',
-        'data_key': 'data',
-        'key_properties': ['id'],
-        'replication_method': 'INCREMENTAL',
-        'replication_keys': ['updated_at'],
-        'params': {
-            'sort_by': ['updated_at-desc'],
-            'with_deleted': '{with_deleted}',
-            'count': 1000,
-            'cursor': None
-        }
-    },
+    # 'cards_video_direct_message': {
+    #     'path': 'accounts/{account_id}/cards/video_direct_message',
+    #     'data_key': 'data',
+    #     'key_properties': ['id'],
+    #     'replication_method': 'INCREMENTAL',
+    #     'replication_keys': ['updated_at'],
+    #     'params': {
+    #         'sort_by': ['updated_at-desc'],
+    #         'with_deleted': '{with_deleted}',
+    #         'count': 1000,
+    #         'cursor': None
+    #     }
+    # },
+
     # Reference: https://developer.twitter.com/en/docs/ads/campaign-management/api-reference/content-categories
     # #content-categories
     'content_categories': {

@@ -68,6 +68,9 @@
     },
     "deleted": {
       "type": ["null", "boolean"]
+    },
+    "budget_optimization": {
+      "type": ["null", "string"]
     }
   }
 }
