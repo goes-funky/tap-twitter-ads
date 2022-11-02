@@ -6,12 +6,9 @@
       "type": ["null", "string"]
     },
     "id": {
-      "type": ["null", "integer"]
-    },
-    "name": {
       "type": ["null", "string"]
     },
-    "id_str": {
+    "name": {
       "type": ["null", "string"]
     },
     "created_at": {
@@ -28,15 +25,9 @@
       "type": ["null", "boolean"]
     },
     "in_reply_to_status_id": {
-      "type": ["null", "integer"]
-    },
-    "in_reply_to_status_id_str": {
       "type": ["null", "string"]
     },
     "in_reply_to_user_id": {
-      "type": ["null", "integer"]
-    },
-    "in_reply_to_user_id_str": {
       "type": ["null", "string"]
     },
     "in_reply_to_screen_name": {
@@ -47,9 +38,6 @@
       "additionalProperties": false,
       "properties": {
         "id": {
-          "type": ["null", "integer"]
-        },
-        "id_str": {
           "type": ["null", "string"]
         },
         "name": {
@@ -330,9 +318,6 @@
       }
     },
     "quote_status_id": {
-      "type": ["null", "integer"]
-    },
-    "quote_status_id_str": {
       "type": ["null", "string"]
     },
     "is_quote_status": {
@@ -411,9 +396,6 @@
                     "type": ["null", "string"]
                   },
                   "id": {
-                    "type": ["null", "integer"]
-                  },
-                  "id_str": {
                     "type": ["null", "string"]
                   },
                   "indices": {
@@ -556,9 +538,6 @@
                 "additionalProperties": false,
                 "properties": {
                   "id": {
-                    "type": ["null", "integer"]
-                  },
-                  "id_str": {
                     "type": ["null", "string"]
                   },
                   "name": {
@@ -686,9 +665,6 @@
                     "type": ["null", "string"]
                   },
                   "id": {
-                    "type": ["null", "integer"]
-                  },
-                  "id_str": {
                     "type": ["null", "string"]
                   },
                   "indices": {
@@ -875,9 +851,6 @@
             "additionalProperties": false,
             "properties": {
               "id": {
-                "type": ["null", "integer"]
-              },
-              "id_str": {
                 "type": ["null", "string"]
               },
               "tag": {
