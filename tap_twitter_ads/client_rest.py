@@ -12,11 +12,10 @@ import singer
 
 LOGGER = singer.get_logger()
 
-ADS_API_VERSION = '10'
+ADS_API_VERSION = '11'
 ADS_API_URL = 'https://ads-api.twitter.com'
 DEFAULT_CONNECTION_TIMEOUT = 5
 DEFAULT_REST_TIMEOUT = 5
-
 
 
 class Server5xxError(Exception):
@@ -255,14 +254,11 @@ class TwitterClient(object):
 
         return response.json()
 
-
     def get(self, url=None, path=None, params=None, **kwargs):
         return self.request('GET', url=url, path=path, params=params, **kwargs)
 
-
     def post(self, url=None, path=None, data=None, params=None, **kwargs):
         return self.request('POST', url=url, path=path, data=data, params=params, **kwargs)
-
 
     @backoff.on_exception(backoff.expo,
                           (Server5xxError, ConnectionError, Server42xRateLimitError),
