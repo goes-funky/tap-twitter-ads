@@ -120,6 +120,7 @@ def get_async_data(report_name, client, url, retried=False):
         response = TwitterRequest(
             client, 'get', resource.path, domain=domain, raw_body=True, stream=True).perform()
         response_body = response.body
+        return response_body
     except Error as err:
         # see twitter_ads.error for more details
         if err.code == 403:
@@ -140,10 +141,10 @@ def get_async_data(report_name, client, url, retried=False):
                     'retry_on_status': [400, 420, 500, 502, 503, 504],
                     'retry_on_timeouts': True,
                     'timeout': (5.0, 10.0)})
-            get_async_data(report_name, client, url, True)
-        LOGGER.error('Report: {} - ERROR: {}'.format(report_name, err.details))
-        raise err
-    return response_body
+            return get_async_data(report_name, client, url, True)
+        else:
+            LOGGER.error('Report: {} - ERROR: {}'.format(report_name, err.details))
+            raise err
 
 
 # List selected fields from stream catalog
