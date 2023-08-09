@@ -8,14 +8,14 @@ from singer import metrics, metadata, Transformer, utils
 from singer.utils import strptime_to_utc
 
 from twitter_ads import API_VERSION
+from twitter_ads.client import Client
 from twitter_ads.cursor import Cursor
 from twitter_ads.http import Request
-from twitter_ads.error import Error
+from twitter_ads.error import Error, Forbidden, ERRORS
 from twitter_ads.utils import split_list
 
 from tap_twitter_ads.transform import transform_record, transform_report
 from tap_twitter_ads.streams import flatten_streams, REPORTS
-
 
 LOGGER = singer.get_logger()
 
@@ -113,15 +113,34 @@ def post_resource(report_name, client, path, params=None, body=None):
     return response_body
 
 
-def get_async_data(report_name, client, url):
+def get_async_data(report_name, client, url, retried=False):
     resource = urlparse(url)
     domain = '{0}://{1}'.format(resource.scheme, resource.netloc)
     try:
-        response = Request(
+        response = TwitterRequest(
             client, 'get', resource.path, domain=domain, raw_body=True, stream=True).perform()
         response_body = response.body
     except Error as err:
         # see twitter_ads.error for more details
+        if err.code == 403:
+            LOGGER.error('Report: {} - FORBIDEN Error: {}'.format(report_name, err.details))
+            if retried:
+                raise err
+            LOGGER.error('Report: {} - Retrying without credentials'.format(report_name))
+            client = Client(
+                consumer_key="",
+                consumer_secret="",
+                access_token="",
+                access_token_secret="",
+                options={
+                    'handle_rate_limit': True,  # Handles 429 errors
+                    'retry_max': 10,
+                    'retry_delay': 60000,  # milliseconds, wait 1 minute for each retry
+                    # Error codes: https://developer.twitter.com/en/docs/basics/response-codes
+                    'retry_on_status': [400, 420, 500, 502, 503, 504],
+                    'retry_on_timeouts': True,
+                    'timeout': (5.0, 10.0)})
+            get_async_data(report_name, client, url, True)
         LOGGER.error('Report: {} - ERROR: {}'.format(report_name, err.details))
         raise err
     return response_body
@@ -181,7 +200,6 @@ def sync_endpoint(client,
                   parent_ids=None,
                   child_streams=None,
                   selected_streams=None):
-
     # endpoint_config variables
     path = endpoint_config.get('path')
     LOGGER.info('Stream: {} - endpoint_config: {}'.format(stream_name, endpoint_config))
@@ -407,8 +425,9 @@ def sync_endpoint(client,
                     # Make chunks of parent_ids
                     for chunk_ids in split_list(parent_ids, parent_id_limit):
                         # pylint: disable=line-too-long
-                        LOGGER.info('Child Stream: {} - Syncing, chunk#: {}, parent_stream: {}, parent chunk_ids: {}'.format(
-                            child_stream_name, chunk, stream_name, chunk_ids))
+                        LOGGER.info(
+                            'Child Stream: {} - Syncing, chunk#: {}, parent_stream: {}, parent chunk_ids: {}'.format(
+                                child_stream_name, chunk, stream_name, chunk_ids))
                         # pylint: enable=line-too-long
 
                         child_total_records = sync_endpoint(
@@ -474,7 +493,7 @@ def get_entity_metric_groups(report_entity, report_segment):
     ]
     # Undocumented rule: CONVERSION_TAGS report segment only allows WEB_CONVERSION metric group
     if report_segment == 'CONVERSION_TAGS' and report_entity in \
-        ['ACCOUNT', 'CAMPAIGN', 'LINE_ITEM', 'PROMOTED_TWEET']:
+            ['ACCOUNT', 'CAMPAIGN', 'LINE_ITEM', 'PROMOTED_TWEET']:
         metric_groups = ['WEB_CONVERSION']
 
     elif report_entity == 'ACCOUNT':
@@ -500,7 +519,7 @@ def get_entity_metric_groups(report_entity, report_segment):
 
     elif report_entity == 'ORGANIC_TWEET':
         metric_groups = ['ENGAGEMENT', 'VIDEO']
-    
+
     return metric_groups
 
 
@@ -509,14 +528,14 @@ def round_times(report_granularity, timezone, start=None, end=None):
     start_rounded = None
     end_rounded = None
     # Round min_start, max_end to hours or dates
-    if report_granularity == 'HOUR': # Round min_start/end to hour
+    if report_granularity == 'HOUR':  # Round min_start/end to hour
         if start:
             start_rounded = remove_minutes_local(start - timedelta(hours=1), timezone)
         if end:
             end_rounded = remove_minutes_local(end + timedelta(hours=1), timezone)
-    else: # DAY, TOTAL, Round min_start, max_end to date
+    else:  # DAY, TOTAL, Round min_start, max_end to date
         if start:
-            start_rounded = remove_hours_local(start  - timedelta(days=1), timezone)
+            start_rounded = remove_hours_local(start - timedelta(days=1), timezone)
         if end:
             end_rounded = remove_hours_local(end + timedelta(days=1), timezone)
     return start_rounded, end_rounded
@@ -567,14 +586,13 @@ def get_tweet_entity_ids(client, account_id, window_start, window_end):
 
 # GET Active Entity IDs w/in date window (rounded for granularity) for an entity type
 def get_active_entity_sets(active_entities, report_name, account_id, report_entity, \
-    report_granularity, timezone, window_start, window_end):
-
+                           report_granularity, timezone, window_start, window_end):
     entity_id_sets = []
     entity_id_set = {}
     # Abstract out the Get Entity IDs and start/end date
     # PLACEMENT LOOP
     # Get entity_ids for each placement type
-    for placement in PLACEMENTS: # ALL_ON_TWITTER, PUBLISHER_NETWORK
+    for placement in PLACEMENTS:  # ALL_ON_TWITTER, PUBLISHER_NETWORK
         # LOGGER.info('placement = {}'.format(placement)) # COMMENT OUT
         entity_ids = []
         min_start = None
@@ -584,7 +602,7 @@ def get_active_entity_sets(active_entities, report_name, account_id, report_enti
         ent = 0
         for active_entity in active_entities:
             active_entity_dict = obj_to_dict(active_entity)
-            LOGGER.info('active_entity_dict = {}'.format(active_entity_dict)) # COMMENT OUT
+            LOGGER.info('active_entity_dict = {}'.format(active_entity_dict))  # COMMENT OUT
             entity_id = active_entity_dict.get('entity_id')
             entity_placements = active_entity_dict.get('placements', [])
             entity_start = strptime_to_utc(active_entity_dict.get(
@@ -630,7 +648,7 @@ def get_active_entity_sets(active_entities, report_name, account_id, report_enti
                 'start_time': min_start_rounded.strftime('%Y-%m-%dT%H:%M:%S%z'),
                 'end_time': max_end_rounded.strftime('%Y-%m-%dT%H:%M:%S%z')
             }
-            LOGGER.info('entity_id_set = {}'.format(entity_id_set)) # COMMENT OUT
+            LOGGER.info('entity_id_set = {}'.format(entity_id_set))  # COMMENT OUT
             entity_id_sets.append(entity_id_set)
 
         # End: for placement in PLACEMENTS
@@ -656,10 +674,10 @@ def get_active_entity_sets(active_entities, report_name, account_id, report_enti
 #      limited to 45 day windows (for SEGMENT queries), 90 days (for non-SEGMENTED)
 # pylint: enable=line-too-long
 def post_queued_async_jobs(client, account_id, report_name, report_entity, entity_ids, report_granularity, \
-    report_segment, metric_groups, placement, start_time, end_time, country_id, platform_id):
+                           report_segment, metric_groups, placement, start_time, end_time, country_id, platform_id):
     queued_job_ids = []
     # CHUNK ENTITY_IDS LOOP
-    chunk = 0 # chunk number
+    chunk = 0  # chunk number
     # Make chunks of 20 of entity_ids
     for chunk_ids in split_list(entity_ids, 20):
         # POST async_queued_job for report entity chunk_ids
@@ -689,12 +707,12 @@ def post_queued_async_jobs(client, account_id, report_name, report_entity, entit
 
         # POST queued_job: asynchronous job
         queued_job = post_resource('queued_job', client, queued_job_path, \
-            queued_job_params)
+                                   queued_job_params)
 
         queued_job_data = queued_job.get('data')
         queued_job_id = queued_job_data.get('id')
         queued_job_ids.append(queued_job_id)
-        LOGGER.info('queued_job_ids = {}'.format(queued_job_ids)) # COMMENT OUT
+        LOGGER.info('queued_job_ids = {}'.format(queued_job_ids))  # COMMENT OUT
         # End: for chunk_ids in entity_ids
     return queued_job_ids
 
@@ -702,8 +720,8 @@ def post_queued_async_jobs(client, account_id, report_name, report_entity, entit
 def get_async_results_urls(client, account_id, report_name, queued_job_ids):
     # WHILE JOBS STILL RUNNING LOOP, GET ASYNC JOB STATUS
     # GET ASYNC Status Reference: https://developer.twitter.com/en/docs/ads/analytics/api-reference/asynchronous#get-stats-jobs-accounts-account-id 
-    jobs_still_running = True # initialize
-    j = 1 # job status check counter
+    jobs_still_running = True  # initialize
+    j = 1  # job status check counter
     async_results_urls = []
     while len(queued_job_ids) > 0 and jobs_still_running and j <= 20:
         # Wait 15 sec for async reports to finish
@@ -727,7 +745,7 @@ def get_async_results_urls(client, account_id, report_name, queued_job_ids):
         LOGGER.info('Report: {} - async_job_statuses params: {}'.format(
             report_name, async_job_statuses_params))
         async_job_statuses = get_resource('async_job_statuses', client, async_job_statuses_path, \
-            async_job_statuses_params)
+                                          async_job_statuses_params)
 
         jobs_still_running = False
         for async_job_status in async_job_statuses:
@@ -745,7 +763,7 @@ def get_async_results_urls(client, account_id, report_name, queued_job_ids):
                 # Remove job_id from queued_job_ids
                 queued_job_ids.remove(job_id)
             # End: async_job_status in async_job_statuses
-        j = j + 1 # increment job status check counter
+        j = j + 1  # increment job status check counter
         # End: async_job_status in async_job_statuses
     return async_results_urls
 
@@ -760,7 +778,6 @@ def sync_report(client,
                 account_id=None,
                 country_ids=None,
                 platform_ids=None):
-
     # PROCESS:
     # Outer-outer loop (in sync): loop through accounts
     # Outer loop (in sync): loop through reports selected in catalog
@@ -810,7 +827,7 @@ def sync_report(client,
     # Initialize date window
     if report_segment:
         # Max is 45 days (segmented), set lower to avoid date/hour rounding issues
-        date_window_size = 42 # is the Answer
+        date_window_size = 42  # is the Answer
     else:
         # Max is 90 days, set lower to avoid date/hour rounding issues
         date_window_size = 85
@@ -855,7 +872,7 @@ def sync_report(client,
         elif report_entity == 'ORGANIC_TWEET':
             LOGGER.info('Report: {} - GET ORGANINC_TWEET entity_ids'.format(report_name))
             entity_ids = get_tweet_entity_ids(client, account_id, window_start, window_end)
-            entity_id_set = { # PUBLISHER_NETWORK is invalid placement for ORGANIC_TWEET
+            entity_id_set = {  # PUBLISHER_NETWORK is invalid placement for ORGANIC_TWEET
                 'placement': 'ALL_ON_TWITTER',
                 'entity_ids': entity_ids,
                 'start_time': window_start_str,
@@ -881,20 +898,20 @@ def sync_report(client,
             LOGGER.info('Report: {} - active_entities params: {}'.format(
                 report_name, active_entities_params))
             active_entities = get_resource('active_entities', client, active_entities_path, \
-                active_entities_params)
+                                           active_entities_params)
 
             # Get active entity_ids, start, end for each placement type for date window
             entity_id_sets = get_active_entity_sets(active_entities,
-                                                           report_name,
-                                                           account_id,
-                                                           report_entity,
-                                                           report_granularity,
-                                                           timezone,
-                                                           window_start_rounded,
-                                                           window_end_rounded)
+                                                    report_name,
+                                                    account_id,
+                                                    report_entity,
+                                                    report_granularity,
+                                                    timezone,
+                                                    window_start_rounded,
+                                                    window_end_rounded)
             # End: else (active_entities)
 
-        LOGGER.info('entity_id_sets = {}'.format(entity_id_sets)) # COMMENT OUT
+        LOGGER.info('entity_id_sets = {}'.format(entity_id_sets))  # COMMENT OUT
 
         # ASYNC report POST requests
         # Get metric_groups for report_entity and report_egment
@@ -907,7 +924,7 @@ def sync_report(client,
         elif report_segment in ('DEVICES', 'PLATFORM_VERSIONS'):
             sub_type = 'platforms'
             sub_type_ids = platform_ids
-        else: # NO sub_type (loop once thru sub_type loop)
+        else:  # NO sub_type (loop once thru sub_type loop)
             sub_type = 'none'
             sub_type_ids = ['none']
 
@@ -930,7 +947,7 @@ def sync_report(client,
             # ENTITY ID SET LOOP
             for entity_id_set in entity_id_sets:
                 entity_id_set_queued_job_ids = []
-                LOGGER.info('entity_id_set = {}'.format(entity_id_set)) # COMMENT OUT
+                LOGGER.info('entity_id_set = {}'.format(entity_id_set))  # COMMENT OUT
                 placement = entity_id_set.get('placement')
                 entity_ids = entity_id_set.get('entity_ids', [])
                 start_time = entity_id_set.get('start_time')
@@ -940,21 +957,21 @@ def sync_report(client,
 
                 # POST ASYNC JOBS for ENTITY ID SET (possibly many chunks)
                 entity_id_set_queued_job_ids = post_queued_async_jobs(client,
-                                                                    account_id,
-                                                                    report_name,
-                                                                    report_entity,
-                                                                    entity_ids,
-                                                                    report_granularity,
-                                                                    report_segment,
-                                                                    metric_groups,
-                                                                    placement,
-                                                                    start_time,
-                                                                    end_time,
-                                                                    country_id,
-                                                                    platform_id)
+                                                                      account_id,
+                                                                      report_name,
+                                                                      report_entity,
+                                                                      entity_ids,
+                                                                      report_granularity,
+                                                                      report_segment,
+                                                                      metric_groups,
+                                                                      placement,
+                                                                      start_time,
+                                                                      end_time,
+                                                                      country_id,
+                                                                      platform_id)
                 sub_type_queued_job_ids = sub_type_queued_job_ids + entity_id_set_queued_job_ids
                 # End: for entity_id_set in entity_id_sets
-            
+
             queued_job_ids = queued_job_ids + sub_type_queued_job_ids
             # End: for sub_type_id in sub_type_ids
 
@@ -962,19 +979,19 @@ def sync_report(client,
         # GET ASYNC Status Reference: https://developer.twitter.com/en/docs/ads/analytics/api-reference/asynchronous#get-stats-jobs-accounts-account-id 
         async_results_urls = []
         async_results_urls = get_async_results_urls(client, account_id, report_name, queued_job_ids)
-        LOGGER.info('async_results_urls = {}'.format(async_results_urls)) # COMMENT OUT
+        LOGGER.info('async_results_urls = {}'.format(async_results_urls))  # COMMENT OUT
 
         # Get stream_metadata from catalog (for Transformer masking and validation below)
         stream = catalog.get_stream(report_name)
         schema = stream.schema.to_dict()
         stream_metadata = metadata.to_map(stream.metadata)
-        
+
         # ASYNC RESULTS DOWNLOAD / PROCESS LOOP
         # RISK: What if some reports error or don't finish?
         # Possibly move this code block withing ASYNC Status Check
         total_records = 0
         for async_results_url in async_results_urls:
-            
+
             # GET DOWNLOAD DATA FROM URL
             LOGGER.info('Report: {} - GET async data from URL: {}'.format(
                 report_name, async_results_url))
@@ -998,11 +1015,11 @@ def sync_report(client,
                     # Transform record with Singer Transformer
 
                     # Evalueate max_bookmark_value
-                    end_time = record.get('end_time') # String
-                    end_dttm = strptime_to_utc(end_time) # Datetime
-                    max_bookmark_dttm = strptime_to_utc(max_bookmark_value) # Datetime
-                    if end_dttm > max_bookmark_dttm: # Datetime comparison
-                        max_bookmark_value = end_time # String
+                    end_time = record.get('end_time')  # String
+                    end_dttm = strptime_to_utc(end_time)  # Datetime
+                    max_bookmark_dttm = strptime_to_utc(max_bookmark_value)  # Datetime
+                    if end_dttm > max_bookmark_dttm:  # Datetime comparison
+                        max_bookmark_value = end_time  # String
 
                     with Transformer() as transformer:
                         transformed_record = transformer.transform(
@@ -1196,3 +1213,33 @@ def sync(client, config, catalog, state):
                     update_currently_syncing(state, None)
 
         LOGGER.info('Account ID: {} - FINISHED Syncing'.format(account_id))
+
+
+class TwitterRequest(Request):
+
+    def perform(self):
+        if super().client.trace:
+            super()._Request__enable_logging()  # Access __enable_logging from the parent class
+        response = super()._Request__oauth_request()  # Access __oauth_request from the parent class
+        if response.code > 399:
+            raise TwitterError.from_response(response)
+        return response
+
+
+class TwitterError(Error):
+
+    def __init__(self, response, **kwargs):
+        self._response = response
+        self._code = kwargs.get('code', response.code)
+        try:
+            if response.body and 'errors' in response.body:
+                self._details = kwargs.get('details', response.body.get('errors'))
+            else:
+                self._details = None
+        except:
+            self._details = None
+
+    @staticmethod
+    def from_response(response):
+        """Returns the correct error type from a ::class::`Response` object."""
+        return TwitterError(response)
